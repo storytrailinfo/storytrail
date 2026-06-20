@@ -328,15 +328,20 @@
       z-index: 1;
     }
 
-    .story-preview {
-      max-width: 680px;
+    .story-preview-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 700px;
       margin: 0 auto;
+    }
+
+    .story-preview-card {
       background: var(--card-bg);
       border: 1px solid rgba(74, 111, 165, 0.3);
       border-radius: 24px;
-      padding: 2.5rem 3rem;
+      padding: 2rem 2.25rem;
       backdrop-filter: blur(12px);
-      position: relative;
     }
 
     .story-tag {
@@ -352,40 +357,38 @@
       text-transform: uppercase;
       padding: 0.3rem 0.9rem;
       border-radius: 100px;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
     }
 
-    .story-preview h3 {
+    .story-preview-card h3 {
       font-family: 'Crimson Pro', serif;
-      font-size: 1.8rem;
+      font-size: 1.4rem;
       font-weight: 400;
       color: var(--cream);
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
       font-style: italic;
     }
 
-    .story-text {
+    .story-text-preview,
+    .story-text-full {
       font-family: 'Crimson Pro', serif;
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: var(--moon-glow);
-      line-height: 1.85;
+      line-height: 1.8;
       font-weight: 300;
+      white-space: pre-line;
     }
 
-    .story-fade {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 120px;
-      background: linear-gradient(transparent, var(--card-bg));
-      border-radius: 0 0 24px 24px;
-      pointer-events: none;
+    .story-text-full {
+      display: none;
+      margin-top: 0.9rem;
     }
 
     .story-meta {
-      margin-top: 1.5rem;
+      margin-bottom: 1.1rem;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.6rem;
       flex-wrap: wrap;
     }
 
@@ -394,17 +397,42 @@
       border: 1px solid rgba(74, 111, 165, 0.3);
       border-radius: 100px;
       padding: 0.25rem 0.8rem;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--sky);
+    }
+
+    .story-expand-btn {
+      display: block;
+      margin-top: 1.25rem;
+      background: none;
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      color: var(--sky);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .story-expand-btn:hover {
+      border-color: rgba(200, 216, 240, 0.5);
+      color: var(--cream);
     }
 
     /* ── FEATURES ── */
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.25rem;
-      max-width: 900px;
+      max-width: 700px;
       margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .feature-card {
@@ -893,22 +921,51 @@
 
 <!-- ── STORY PREVIEW ── -->
 <section class="story-section" id="stories">
-  <p class="section-label">Example Story</p>
-  <h2 class="section-title">A trail through the starfields</h2>
-  <p class="section-sub">Here's a sample of the kind of adventure your little dreamer's story might sound like.</p>
+  <p class="section-label">Example Stories</p>
+  <h2 class="section-title">A few nights from the trail</h2>
+  <p class="section-sub">Three samples of the kind of adventure your little dreamer's story might sound like.</p>
 
-  <div class="story-preview">
-    <span class="story-tag">✦ Sample Story</span>
-    <h3>Mia and the Sky-Blue Dragon</h3>
-    <p class="story-text">
-      The night Mia climbed to the highest branch of the Whispering Willow, she was not expecting to find a dragon waiting there — a small one, no bigger than her favorite stuffed dinosaur, with scales the exact shade of the sky just after sunset. Its name, she would soon discover, was Cobalt, and it had traveled fourteen thousand leagues to find a girl brave enough to help it carry home a star that had fallen asleep on the wrong cloud…
-    </p>
-    <div class="story-fade"></div>
-    <div class="story-meta">
-      <span class="story-chip">🐉 Dragons</span>
-      <span class="story-chip">💙 Sky Blue</span>
-      <span class="story-chip">⭐ Adventure</span>
+  <div class="story-preview-grid">
+
+    <div class="story-preview-card">
+      <span class="story-tag">✦ Sample Story</span>
+      <h3>Sarah and the Yellow Door</h3>
+      <div class="story-meta">
+        <span class="story-chip">🦄 Unicorns</span>
+        <span class="story-chip">💛 Yellow</span>
+        <span class="story-chip">🌈 Rainbows</span>
+      </div>
+      <div class="story-text-preview" id="story-preview-1">Sarah was putting away her raincoat when she noticed it — a door at the very back of the closet that had never been there before. It was small and round-topped, painted the softest shade of yellow, with a handle made of smooth white stone.</div>
+      <div class="story-text-full" id="story-full-1"></div>
+      <button class="story-expand-btn" onclick="toggleStory(1)" id="story-btn-1">Read the full story</button>
     </div>
+
+    <div class="story-preview-card">
+      <span class="story-tag">✦ Sample Story</span>
+      <h3>Ryan and the Star Rescue</h3>
+      <div class="story-meta">
+        <span class="story-chip">🚒 Firetrucks</span>
+        <span class="story-chip">❤️ Red</span>
+        <span class="story-chip">🚀 Space</span>
+      </div>
+      <div class="story-text-preview" id="story-preview-2">Ryan kept his toy firetruck on his windowsill every night, parked carefully beside the glass, ladder pointing up toward the stars like it was getting ready for the world's tallest rescue. Tonight, the firetruck was glowing.</div>
+      <div class="story-text-full" id="story-full-2"></div>
+      <button class="story-expand-btn" onclick="toggleStory(2)" id="story-btn-2">Read the full story</button>
+    </div>
+
+    <div class="story-preview-card">
+      <span class="story-tag">✦ Sample Story</span>
+      <h3>Mia and the Purple Ocean</h3>
+      <div class="story-meta">
+        <span class="story-chip">🦕 Dinosaurs</span>
+        <span class="story-chip">💜 Purple</span>
+        <span class="story-chip">🧜 Mermaids</span>
+      </div>
+      <div class="story-text-preview" id="story-preview-3">One evening, Mia was sitting at the edge of the bathtub, trailing her fingers through the water, when she noticed something strange. The water wasn't staying still the way it usually did. And then, very quietly, it spoke.</div>
+      <div class="story-text-full" id="story-full-3"></div>
+      <button class="story-expand-btn" onclick="toggleStory(3)" id="story-btn-3">Read the full story</button>
+    </div>
+
   </div>
 </section>
 
@@ -1026,6 +1083,31 @@
   resize();
   initStars();
   drawStars();
+
+  // Full sample story text -- used by the expandable preview cards
+  const sampleStories = ["Sarah was putting away her raincoat when she noticed it — a door at the very back of the closet that had never been there before. It was small and round-topped, painted the softest shade of yellow, with a handle made of smooth white stone. She didn't feel afraid of it. She felt curious, the way you feel when you find a interesting shell on the beach and want to know what lives inside.\n\nShe turned the handle, and the door swung open onto a path made of pale golden grass that stretched away into a gentle morning light.\n\nSarah stepped through.\n\nThe world on the other side looked almost like her own town — there was a bakery on a corner, and a little park with a fountain, and houses with gardens. But everything was just slightly different. The streetlamps grew like tall flowers, curling at the top. The clouds were softer, slower, shaped like sleeping animals. The colors were a little warmer, as if someone had turned up the glow on everything just a notch.\n\nStanding in the middle of the path was a unicorn.\n\nShe was small, about the height of a large dog, with a coat the color of fresh cream and a mane that shifted between soft gold and white depending on how she moved. She didn't say hello. Instead, she lowered her horn and drew a glowing picture in the air — a little sketch of a basket, then a house with a yellow door, then a small figure waiting by a window.\n\nSarah understood immediately. \"You need me to deliver something,\" she said.\n\nThe unicorn nodded and nudged a small basket toward her with her nose. Inside, wrapped in cloth the color of sunshine, was a jar of something that glowed faintly — warm and golden, like captured afternoon light. Sarah didn't know what it was exactly, but it smelled like warm bread and rain on dry grass and something she couldn't name but that made her feel perfectly safe.\n\nThey walked together through the almost-familiar streets. The unicorn guided her by drawing small glowing arrows in the air whenever they reached a corner — one pointing left near the flower-lamp, one pointing right past a garden where rainbow-colored birds sat quietly on the fence, heads tucked under their wings.\n\nAt one point the path dipped through a low tunnel of tangled vines and Sarah had to duck, and for just a moment she couldn't see where she was going. But the unicorn's horn glowed steadily ahead of her, a warm yellow-white light, and she followed it without worry until they stepped out the other side into open air again.\n\nThe house with the yellow door was on a quiet lane near the edge of town. An old woman sat by the window, her chin resting on her hand, watching the path. When she saw Sarah coming, her whole face lifted.\n\nSarah handed her the basket. The old woman opened the cloth, and the golden glow spread gently across her hands and her face and the glass of the window.\n\nShe drew a picture in the air then too — just like the unicorn did. A simple glowing picture of a sun rising.\n\nSarah smiled. She thought she understood. Something that had been dark was going to be a little lighter now. That was enough.\n\nThe walk back felt shorter, the way walks home usually do. The unicorn guided her all the way to the round yellow door, which was waiting right where they had left it, open just a crack, the light of Sarah's closet spilling through.\n\nThe unicorn drew one last picture — a small girl in a bed, tucked in, eyes closed, peaceful.\n\nSarah laughed quietly. \"I know,\" she said. \"It's time.\"\n\nShe gave the unicorn one gentle pat on her soft nose, stepped through the door, and heard it close behind her with a sound like a quiet sigh.\n\nShe hung up her raincoat, padded down the hall, and climbed into bed.\n\nOutside her window, the sky was the deep, soft blue of late evening, and somewhere far above it, she was pretty sure, a small unicorn was making her way home too.", "Ryan kept his toy firetruck on his windowsill every night, parked carefully beside the glass, ladder pointing up toward the stars like it was getting ready for the world's tallest rescue.\n\nTonight, the firetruck was glowing.\n\nRyan sat up in bed, rubbing his eyes, certain he was imagining it. But the little red truck kept glowing, brighter and brighter, until it was nearly as big as the real ones that roared past his house sometimes with their sirens singing.\n\n\"Climb in,\" said a voice, low and friendly, like an engine humming at rest. \"We've got a call.\"\n\nThe firetruck — somehow now exactly Ryan-sized — had a face now too, kind headlight eyes and a grille that curved into something like a smile.\n\n\"What's your name?\" Ryan asked, climbing up into the driver's seat, which fit him perfectly.\n\n\"Captain Ruby,\" the firetruck said. \"And tonight's call isn't a fire. It's a star. One of them's gotten loose from its spot up there and can't find its way back.\"\n\nRuby's engine rumbled to life, and instead of rolling down the driveway, she lifted straight up off the ground, ladder folding neatly against her red sides as they rose past the rooftop, past the clouds, until the whole sleeping town glowed gold and tiny below them.\n\n\"There,\" Ruby said, pointing her headlights toward a single star blinking anxiously off to the side of its constellation, dimmer than the others, drifting slowly further away with every second.\n\n\"Is it scared?\" Ryan asked.\n\n\"Lost stars usually are,\" Ruby said. \"But that's what we're here for.\"\n\nThey sped through the dark, Ruby's siren humming a soft, gentle tune instead of a loud wail — a lullaby siren, just for nighttime rescues. As they got closer, Ryan could see the star was small, no bigger than a marble, spinning in slow, worried circles.\n\n\"Hello,\" Ryan called out, leaning over the side. \"We're here to help you home.\"\n\nThe little star blinked, surprised, then drifted shyly closer.\n\n\"Extend the ladder,\" Ryan said, the way he'd practiced a hundred times with his toy truck on the living room floor.\n\nRuby's ladder unfolded smoothly, stretching out toward the star, who climbed on with a soft, twinkling hop, settling right at the very top rung like it was the safest seat in the sky.\n\n\"Hold tight,\" Ryan told the star, and together they turned back toward the constellation, the star's worried blinking slowing into something calmer, steadier, the closer they got to home.\n\nThe constellation came into view — seven stars arranged like a gentle, curving smile, with one empty spot waiting right in the middle.\n\n\"Right there,\" Ruby said, easing the ladder up until the little star could reach its spot.\n\nThe star settled in with a soft, happy shimmer, and immediately the whole constellation seemed to glow a little warmer, a little steadier, like a puzzle finally finished.\n\n\"Thank you,\" the star seemed to say, though it was more of a feeling than actual words — warm and grateful, settling over Ryan like a blanket.\n\n\"That's what we do,\" Ryan said proudly, patting Ruby's dashboard.\n\nRuby's siren hummed once more, satisfied, and they began drifting back down through the clouds, past the rooftops, toward Ryan's window, which was still glowing faintly gold from the porch light below.\n\n\"Good work tonight, Captain,\" Ruby said, as Ryan climbed back through his window and into bed.\n\n\"Will there be another call tomorrow?\" Ryan asked, already half-asleep.\n\n\"There's always another call,\" Ruby said softly, settling back onto the windowsill, shrinking gently back down to her regular toy size, ladder folding neatly into place. \"But for now — rest. Even firetrucks need their sleep.\"\n\nRyan smiled, pulling his blankets up to his chin, and drifted off to sleep with the stars shining steady and bright outside his window, every single one exactly where it belonged.", "One evening, Mia was sitting at the edge of the bathtub, trailing her fingers through the water, when she noticed something strange. The water wasn't staying still the way it usually did. It was swirling in a slow, gentle spiral, almost like it was trying to tell her something. And then, very quietly, it did.\n\n\"Hello,\" said the water.\n\nMia blinked. She wasn't frightened, not exactly. Just very, very curious. \"Hello,\" she said back, because it seemed like the right thing to do.\n\nThe water shimmered, and the bathtub seemed to grow — or maybe Mia grew smaller, she wasn't quite sure — until she was floating in the most unusual ocean she had ever seen. The water here was the softest shade of purple, lit from somewhere far below with a warm, gentle glow. Clouds of tiny silver bubbles drifted upward like slow-motion snow falling the wrong way. Plants grew sideways instead of up. And Mia, somehow, could breathe perfectly fine.\n\nStanding nearby — or floating, really — was a girl about Mia's age, looking equally amazed and a little bit delighted. She had dark braids and was wearing a yellow raincoat that didn't seem to mind being underwater at all.\n\n\"I'm Priya,\" the girl said. \"Did the water talk to you too?\"\n\n\"It did,\" said Mia. \"I think it wanted us to come here.\"\n\nPriya pointed ahead, where a long-necked dinosaur — a Plesiosaur, the swimming kind, with flippers like paddles — was hovering near a cluster of coral shaped like candelabras. On the other side of the coral, a mermaid with a shimmering green tail sat with her arms crossed and her eyes looking very determinedly at nothing in particular.\n\nNeither the dinosaur nor the mermaid was looking at the other. But both of them looked quietly, deeply sad.\n\nMia and Priya swam a little closer. Slowly, so as not to startle anyone.\n\n\"What happened?\" Mia asked gently.\n\nThe Plesiosaur let out a long, bubbling sigh. She explained that she had been gathering the coral candelabras — not to keep, just to look at them up close. She loved beautiful things and sometimes forgot to ask first. When the mermaid arrived and found them moved, she thought someone had taken them away on purpose, just to be unkind.\n\nThe mermaid's chin wobbled a little when she heard this. \"I didn't know,\" she admitted quietly. \"I thought you didn't care about my garden.\"\n\n\"I cared about it so much I couldn't stop looking,\" said the Plesiosaur.\n\nPriya had a good idea. \"Could you look at it together?\" she asked. \"Then you'd both know.\"\n\nIt was such a simple thing. But the mermaid uncrossed her arms, and the Plesiosaur swam a little closer, and the two of them began pointing out their favorite parts of the garden to each other. This spiral piece. That one that glowed faintly pink. The one that looked a little like a sleeping cat if you tilted your head just right.\n\nMia and Priya sat on the seafloor together, watching, not needing to do anything else. Around them, the purple water glowed a little brighter. The silver bubbles drifted upward a little more slowly, as if the whole ocean had relaxed.\n\nAfter a while, the mermaid and the Plesiosaur seemed so absorbed in conversation that they hardly needed an audience anymore. The water began to shimmer again, the way it had at the very beginning.\n\nPriya smiled at Mia. \"I think we did what we came to do,\" she said.\n\nMia nodded. She felt the way you feel at the end of a long, good day — not tired exactly, but settled. Full, somehow, in a quiet way.\n\nThe purple water rose around her like a soft blanket, warm and slow, and carried her gently all the way home."];
+
+  function toggleStory(num) {
+    const fullEl = document.getElementById(`story-full-${num}`);
+    const previewEl = document.getElementById(`story-preview-${num}`);
+    const btnEl = document.getElementById(`story-btn-${num}`);
+
+    const isOpen = fullEl.style.display === 'block';
+
+    if (isOpen) {
+      fullEl.style.display = 'none';
+      previewEl.style.display = 'block';
+      btnEl.textContent = 'Read the full story';
+    } else {
+      if (!fullEl.textContent) {
+        fullEl.textContent = sampleStories[num - 1];
+      }
+      fullEl.style.display = 'block';
+      previewEl.style.display = 'none';
+      btnEl.textContent = 'Show less';
+    }
+  }
+
 </script>
 </body>
 </html>
