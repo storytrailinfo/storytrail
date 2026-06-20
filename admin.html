@@ -321,7 +321,7 @@
     }
 
     /* ── LOG TABLE ── */
-    #panel-logs { max-width: none; }
+    #panel-logs, #panel-users { max-width: none; }
 
     .log-table {
       width: 100%;
@@ -408,7 +408,18 @@
             <button class="sort-btn active" id="users-sort-newest" onclick="setUsersSort('newest')">Newest first</button>
             <button class="sort-btn" id="users-sort-oldest" onclick="setUsersSort('oldest')">Oldest first</button>
           </div>
-          <div id="user-list"></div>
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Parent</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Stories</th>
+                <th>Next send</th>
+              </tr>
+            </thead>
+            <tbody id="user-list"></tbody>
+          </table>
         </div>
 
         <div class="panel" id="panel-stories">
@@ -668,7 +679,7 @@
       const listEl = document.getElementById('user-list');
 
       if (!allUsers || allUsers.length === 0) {
-        listEl.innerHTML = '<div class="empty">No users yet.</div>';
+        listEl.innerHTML = '<tr><td colspan="5" class="empty">No users yet.</td></tr>';
         return;
       }
 
@@ -684,33 +695,36 @@
           : '<span class="badge badge-inactive">Inactive</span>';
         const themes = (user.theme_tags || []).join(', ') || 'None given';
 
-        return `
-          <div class="item-card" onclick="toggleItem('user-${i}')">
-            <div class="item-card-header">
-              <div>
-                <div class="item-card-title">${escapeHtml(parentName)}</div>
-                <div class="item-card-sub">${escapeHtml(user.parent_email)}</div>
-              </div>
-              <div class="item-card-meta">
-                ${statusBadge}<br/>
-                ${user.story_count} ${user.story_count === 1 ? 'story' : 'stories'}<br/>
-                Next: ${formatNextSend(user.next_send_at)}
-              </div>
-            </div>
-            <div class="item-full" id="user-${i}">
-              <div class="detail-row"><span class="detail-label">Child's name</span><span class="detail-value">${escapeHtml(user.child_name)}</span></div>
-              <div class="detail-row"><span class="detail-label">Age</span><span class="detail-value">${user.child_age}</span></div>
-              <div class="detail-row"><span class="detail-label">Favorite color</span><span class="detail-value">${escapeHtml(user.favorite_color || 'Not given')}</span></div>
-              <div class="detail-row"><span class="detail-label">Favorite animal</span><span class="detail-value">${escapeHtml(user.favorite_animal || 'Not given')}</span></div>
-              <div class="detail-row"><span class="detail-label">Things they love</span><span class="detail-value">${escapeHtml(themes)}</span></div>
-              <div class="detail-row"><span class="detail-label">Time zone</span><span class="detail-value">${escapeHtml(user.timezone)}</span></div>
-              <div class="detail-row"><span class="detail-label">Next story</span><span class="detail-value">${formatNextSend(user.next_send_at)}</span></div>
-              <div class="detail-row"><span class="detail-label">Stories generated</span><span class="detail-value">${user.story_count}</span></div>
-              <div class="detail-row"><span class="detail-label">Subscribed since</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span></div>
-              <button class="copy-link-btn" id="copy-btn-${i}" onclick="event.stopPropagation(); copyPreferencesLink('${user.id}', ${i})">Copy update-preferences link</button>
-            </div>
-          </div>
+        const mainRow = `
+          <tr onclick="toggleItem('user-${i}')" style="cursor: pointer;">
+            <td class="log-name">${escapeHtml(parentName)}</td>
+            <td class="log-email">${escapeHtml(user.parent_email)}</td>
+            <td>${statusBadge}</td>
+            <td>${user.story_count} ${user.story_count === 1 ? 'story' : 'stories'}</td>
+            <td class="log-date">${formatNextSend(user.next_send_at)}</td>
+          </tr>
         `;
+
+        const detailRow = `
+          <tr>
+            <td colspan="5" style="padding: 0;">
+              <div class="item-full" id="user-${i}" style="margin: 0; padding: 0 0.9rem;">
+                <div class="detail-row"><span class="detail-label">Child's name</span><span class="detail-value">${escapeHtml(user.child_name)}</span></div>
+                <div class="detail-row"><span class="detail-label">Age</span><span class="detail-value">${user.child_age}</span></div>
+                <div class="detail-row"><span class="detail-label">Favorite color</span><span class="detail-value">${escapeHtml(user.favorite_color || 'Not given')}</span></div>
+                <div class="detail-row"><span class="detail-label">Favorite animal</span><span class="detail-value">${escapeHtml(user.favorite_animal || 'Not given')}</span></div>
+                <div class="detail-row"><span class="detail-label">Things they love</span><span class="detail-value">${escapeHtml(themes)}</span></div>
+                <div class="detail-row"><span class="detail-label">Time zone</span><span class="detail-value">${escapeHtml(user.timezone)}</span></div>
+                <div class="detail-row"><span class="detail-label">Next story</span><span class="detail-value">${formatNextSend(user.next_send_at)}</span></div>
+                <div class="detail-row"><span class="detail-label">Stories generated</span><span class="detail-value">${user.story_count}</span></div>
+                <div class="detail-row"><span class="detail-label">Subscribed since</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span></div>
+                <button class="copy-link-btn" id="copy-btn-${i}" onclick="event.stopPropagation(); copyPreferencesLink('${user.id}', ${i})">Copy update-preferences link</button>
+              </div>
+            </td>
+          </tr>
+        `;
+
+        return mainRow + detailRow;
       }).join('');
     }
 
