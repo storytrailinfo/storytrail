@@ -233,41 +233,60 @@ async function runPipeline() {
 
   console.log(`Found ${dueChildren.length} due child(ren).`);
 
-  for (const child of dueChildren) {
-    console.log(`\n--- Processing ${child.child_name} ---`);
+  // ---- Process children concurrently, in batches ----
+  // Sequential processing (one child at a time) is fine at small scale,
+  // but doesn't hold up as subscriber count grows -- if 50 kids are due
+  // in the same hour (e.g. everyone in the same timezone), processing
+  // them one after another could take several minutes and risk hitting
+  // GitHub Actions' execution time limits. Batches of 10 run concurrently
+  // instead, so a slow story for one kid doesn't delay everyone after them.
+  const BATCH_SIZE = 10;
 
-    try {
-      console.log("Generating story...");
-      const story = await generateStory(child);
-      console.log(`Story generated (${story.split(/\s+/).length} words).`);
+  for (let i = 0; i < dueChildren.length; i += BATCH_SIZE) {
+    const batch = dueChildren.slice(i, i + BATCH_SIZE);
+    console.log(`\nProcessing batch ${Math.floor(i / BATCH_SIZE) + 1} (${batch.length} children)...`);
 
-      console.log("Sending email...");
-      await sendStoryEmail(child, story);
-      console.log("Email sent.");
-
-      console.log("Saving story...");
-      await supabase.from("stories").insert({
-        child_id: child.id,
-        child_name: child.child_name,
-        story_text: story,
-        send_type: "nightly",
-      });
-
-      console.log("Advancing schedule...");
-      await advanceSchedule(child.id);
-      console.log("Schedule advanced -- next story tomorrow at 6pm their time.");
-
-      console.log(`--- ${child.child_name}: done ---`);
-    } catch (err) {
-      // IMPORTANT: if anything fails for this child, we do NOT advance their
-      // schedule. That means next hour's run will see them as still "due"
-      // and retry automatically, instead of silently skipping a night.
-      console.error(`--- ${child.child_name}: FAILED ---`);
-      console.error(err.message);
-    }
+    // Promise.allSettled (not Promise.all) is deliberate: if one child's
+    // story fails, the others in the batch still complete. Promise.all
+    // would abort the whole batch on a single failure.
+    await Promise.allSettled(batch.map((child) => processChild(child)));
   }
 
   console.log("\nPipeline run complete.");
+}
+
+async function processChild(child) {
+  console.log(`\n--- Processing ${child.child_name} ---`);
+
+  try {
+    console.log(`[${child.child_name}] Generating story...`);
+    const story = await generateStory(child);
+    console.log(`[${child.child_name}] Story generated (${story.split(/\s+/).length} words).`);
+
+    console.log(`[${child.child_name}] Sending email...`);
+    await sendStoryEmail(child, story);
+    console.log(`[${child.child_name}] Email sent.`);
+
+    console.log(`[${child.child_name}] Saving story...`);
+    await supabase.from("stories").insert({
+      child_id: child.id,
+      child_name: child.child_name,
+      story_text: story,
+      send_type: "nightly",
+    });
+
+    console.log(`[${child.child_name}] Advancing schedule...`);
+    await advanceSchedule(child.id);
+    console.log(`[${child.child_name}] Schedule advanced -- next story tomorrow at 6pm their time.`);
+
+    console.log(`--- ${child.child_name}: done ---`);
+  } catch (err) {
+    // IMPORTANT: if anything fails for this child, we do NOT advance their
+    // schedule. That means next hour's run will see them as still "due"
+    // and retry automatically, instead of silently skipping a night.
+    console.error(`--- ${child.child_name}: FAILED ---`);
+    console.error(err.message);
+  }
 }
 
 runPipeline();
