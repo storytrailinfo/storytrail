@@ -565,24 +565,23 @@
       const errorEl = document.getElementById('gate-error');
       errorEl.style.display = 'none';
 
-      const result = await fetchFromServer('users', password);
+      // Verify the password with a lightweight dashboard fetch rather
+      // than pre-loading users data here -- keeps "fetch" and "render"
+      // always paired together in switchPanel, with no risk of data
+      // being fetched once but never actually drawn to the page.
+      const dashResult = await fetchFromServer('dashboard', password, dashPeriod);
 
-      if (result === null) {
+      if (dashResult === null) {
         errorEl.style.display = 'block';
         return;
       }
 
       adminPassword = password;
-      allUsers = result.users || [];
 
       document.getElementById('gate').style.display = 'none';
       document.getElementById('app').style.display = 'block';
 
-      // Load the dashboard immediately since it's the default landing panel
-      const dashResult = await fetchFromServer('dashboard', null, dashPeriod);
-      if (dashResult) {
-        renderDashboard(dashResult.dashboard);
-      }
+      renderDashboard(dashResult.dashboard);
     }
 
     async function fetchFromServer(view, passwordOverride, period) {
