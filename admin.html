@@ -288,6 +288,26 @@
       cursor: not-allowed;
     }
 
+    .copy-link-btn {
+      display: block;
+      margin-top: 1rem;
+      width: 100%;
+      background: rgba(74, 111, 165, 0.12);
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      color: var(--sky);
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      padding: 0.55rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .copy-link-btn:hover {
+      background: rgba(74, 111, 165, 0.2);
+      color: var(--cream);
+    }
+
     .error-block {
       margin-top: 0.6rem;
       padding: 0.6rem 0.8rem;
@@ -633,6 +653,25 @@
       return `${days} days`;
     }
 
+    function formatNextSend(dateStr, timezone) {
+      if (!dateStr) return 'Not scheduled';
+      try {
+        return new Date(dateStr).toLocaleString('en-US', {
+          timeZone: timezone || 'America/New_York',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        });
+      } catch (err) {
+        // Falls back to the default timezone above if the stored
+        // timezone string is ever invalid for some reason
+        return new Date(dateStr).toLocaleString('en-US', {
+          month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+        });
+      }
+    }
+
     function renderUsers() {
       const listEl = document.getElementById('user-list');
 
@@ -663,7 +702,7 @@
               <div class="item-card-meta">
                 ${statusBadge}<br/>
                 ${user.story_count} ${user.story_count === 1 ? 'story' : 'stories'}<br/>
-                Subscribed ${daysSince(user.created_at)}
+                Next: ${formatNextSend(user.next_send_at, user.timezone)}
               </div>
             </div>
             <div class="item-full" id="user-${i}">
@@ -673,12 +712,24 @@
               <div class="detail-row"><span class="detail-label">Favorite animal</span><span class="detail-value">${escapeHtml(user.favorite_animal || 'Not given')}</span></div>
               <div class="detail-row"><span class="detail-label">Things they love</span><span class="detail-value">${escapeHtml(themes)}</span></div>
               <div class="detail-row"><span class="detail-label">Time zone</span><span class="detail-value">${escapeHtml(user.timezone)}</span></div>
+              <div class="detail-row"><span class="detail-label">Next story</span><span class="detail-value">${formatNextSend(user.next_send_at, user.timezone)}</span></div>
               <div class="detail-row"><span class="detail-label">Stories generated</span><span class="detail-value">${user.story_count}</span></div>
               <div class="detail-row"><span class="detail-label">Subscribed since</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span></div>
+              <button class="copy-link-btn" id="copy-btn-${i}" onclick="event.stopPropagation(); copyPreferencesLink('${user.id}', ${i})">Copy update-preferences link</button>
             </div>
           </div>
         `;
       }).join('');
+    }
+
+    function copyPreferencesLink(childId, i) {
+      const link = `https://storytrail.shop/update-preferences?id=${childId}`;
+      navigator.clipboard.writeText(link).then(() => {
+        const btn = document.getElementById(`copy-btn-${i}`);
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = originalText; }, 1500);
+      });
     }
 
     function renderStories() {
