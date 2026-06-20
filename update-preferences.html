@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Update Preferences – StoryTrail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --midnight: #080C24;
+      --deep-navy: #0C1540;
+      --periwinkle: #4A6FA5;
+      --sky: #7BA7D4;
+      --moon-glow: #C8D8F0;
+      --cream: #EEF2FF;
+      --gold: #F0C060;
+      --gold-light: #FDE68A;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--midnight);
+      color: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon-container {
+      position: fixed;
+      top: -40px;
+      right: 6%;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #EEF4FF 0%, #C8D8F0 35%, #9DB8E0 65%, #6A8FC0 100%);
+      box-shadow:
+        0 0 60px 20px rgba(200, 216, 240, 0.25),
+        0 0 120px 50px rgba(200, 216, 240, 0.12),
+        inset -30px -20px 60px rgba(60, 80, 140, 0.4);
+      animation: moonFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(2deg); }
+      50% { transform: translateY(-18px) rotate(-1deg); }
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--deep-navy);
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      border-radius: 28px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .moon-icon {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      text-align: center;
+      color: var(--cream);
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--sky);
+      margin-bottom: 1.75rem;
+      font-weight: 300;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--sky);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.04em;
+    }
+
+    .form-group input {
+      width: 100%;
+      background: rgba(8, 12, 36, 0.6);
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input::placeholder { color: rgba(74, 111, 165, 0.5); }
+
+    .form-group input:focus {
+      border-color: rgba(200, 216, 240, 0.6);
+      box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .form-hint {
+      font-size: 0.72rem;
+      color: var(--periwinkle);
+      margin-top: 0.35rem;
+    }
+
+    .form-error {
+      font-size: 0.75rem;
+      color: #F87171;
+      margin-top: 0.3rem;
+      display: none;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight);
+      border: none;
+      padding: 0.9rem;
+      border-radius: 100px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 20px rgba(240, 192, 96, 0.25);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(240, 192, 96, 0.4);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .submit-error {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: #F87171;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    .success-state h2 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.6rem;
+      color: var(--cream);
+      margin-bottom: 0.75rem;
+    }
+
+    .success-state p {
+      font-size: 0.9rem;
+      color: var(--sky);
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    .loading-state {
+      text-align: center;
+      color: var(--sky);
+      padding: 2rem 0;
+    }
+
+    @media (max-width: 540px) {
+      .form-row { grid-template-columns: 1fr; }
+      .card { padding: 1.75rem 1.5rem; }
+      .moon-container { width: 130px; height: 130px; top: -20px; right: -10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+  <div class="moon-container">
+    <div class="moon"></div>
+  </div>
+
+  <div class="card">
+
+    <div id="loading-view">
+      <div class="loading-state">Loading profile...</div>
+    </div>
+
+    <div id="error-view" style="display:none;">
+      <div class="moon-icon">🌙</div>
+      <h1>Hmm, we couldn't find that</h1>
+      <p class="subtitle" id="error-message">This link may be incorrect or expired. Reply to any of our emails and we'll help sort it out.</p>
+    </div>
+
+    <div id="form-view" style="display:none;">
+      <div class="moon-icon">🌙</div>
+      <h1>Update <span id="child-name-heading">your child</span>'s preferences</h1>
+      <p class="subtitle">Things change! Update what they love and tomorrow's story will follow along.</p>
+
+      <div class="submit-error" id="submit-error"></div>
+
+      <form id="update-form">
+        <div class="form-group">
+          <label for="child-age">Age</label>
+          <input type="number" id="child-age" min="1" max="17" required />
+          <p class="form-error" id="age-error">Please enter a valid age (1–17).</p>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fav-color">Favorite color</label>
+            <input type="text" id="fav-color" placeholder="e.g. sky blue" />
+          </div>
+          <div class="form-group">
+            <label for="fav-animal">Favorite animal</label>
+            <input type="text" id="fav-animal" placeholder="e.g. dragon" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fav-thing">Things they love</label>
+          <input type="text" id="fav-thing" placeholder="e.g. dinosaurs, rocket ships, unicorns…" />
+          <p class="form-hint">Separate with commas. This replaces what's currently saved.</p>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">Save changes</button>
+      </form>
+    </div>
+
+    <div class="success-state" id="success-view">
+      <div class="success-icon">🌟</div>
+      <h2>All set!</h2>
+      <p>We've updated their preferences. Tonight's story will reflect what's new.</p>
+    </div>
+
+  </div>
+
+  <script>
+    const EDGE_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/update-preferences";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_THFfVECYJDIG_B6XPJkWig_jnIEcBS2";
+
+    const params = new URLSearchParams(window.location.search);
+    const childId = params.get('id');
+
+    async function callFunction(payload) {
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      return { ok: response.ok, result };
+    }
+
+    async function loadProfile() {
+      if (!childId) {
+        showError("This link is missing some information. Please use the link from your email.");
+        return;
+      }
+
+      const { ok, result } = await callFunction({ action: 'get', child_id: childId });
+
+      if (!ok) {
+        showError(result.error);
+        return;
+      }
+
+      const child = result.child;
+      document.getElementById('child-name-heading').textContent = child.child_name + "'s";
+      document.getElementById('child-age').value = child.child_age;
+      document.getElementById('fav-color').value = child.favorite_color || '';
+      document.getElementById('fav-animal').value = child.favorite_animal || '';
+      document.getElementById('fav-thing').value = (child.theme_tags || []).join(', ');
+
+      document.getElementById('loading-view').style.display = 'none';
+      document.getElementById('form-view').style.display = 'block';
+    }
+
+    function showError(message) {
+      document.getElementById('loading-view').style.display = 'none';
+      document.getElementById('error-view').style.display = 'block';
+      if (message) {
+        document.getElementById('error-message').textContent = message;
+      }
+    }
+
+    document.getElementById('update-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      document.getElementById('age-error').style.display = 'none';
+      document.getElementById('submit-error').style.display = 'none';
+
+      const age = parseInt(document.getElementById('child-age').value, 10);
+      const color = document.getElementById('fav-color').value.trim();
+      const animal = document.getElementById('fav-animal').value.trim();
+      const thing = document.getElementById('fav-thing').value.trim();
+
+      if (!age || age < 1 || age > 17) {
+        document.getElementById('age-error').style.display = 'block';
+        return;
+      }
+
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+
+      const { ok, result } = await callFunction({
+        action: 'update',
+        child_id: childId,
+        child_age: age,
+        favorite_color: color,
+        favorite_animal: animal,
+        theme_tags: thing ? thing.split(',').map(t => t.trim()).filter(Boolean) : [],
+      });
+
+      if (!ok) {
+        document.getElementById('submit-error').textContent = result.error || 'Something went wrong. Please try again.';
+        document.getElementById('submit-error').style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save changes';
+        return;
+      }
+
+      document.getElementById('form-view').style.display = 'none';
+      document.getElementById('success-view').style.display = 'block';
+    });
+
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.4 + 0.2,
+          alpha: Math.random(),
+          speed: Math.random() * 0.008 + 0.002,
+          dir: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed * s.dir;
+        if (s.alpha > 1 || s.alpha < 0.1) s.dir *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 216, 240, ${s.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    drawStars();
+
+    loadProfile();
+  </script>
+</body>
+</html>

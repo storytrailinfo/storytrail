@@ -66,12 +66,40 @@ async function generateStory(child) {
 }
 
 // ---- Step 3: send the story via Resend ----
+function buildEmailHtml(child, story) {
+  // story comes back as plain text with paragraph breaks -- wrap each
+  // paragraph in <p> so it renders with proper spacing in an inbox
+  const storyHtml = story
+    .split(/\n\s*\n/)
+    .map((para) => `<p style="margin:0 0 16px;">${para.trim()}</p>`)
+    .join("");
+
+  return `
+<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;padding:24px;color:#2c2c2a;">
+  <div style="text-align:center;padding-bottom:16px;border-bottom:1px solid #e5e3da;margin-bottom:24px;">
+    <span style="font-size:20px;font-weight:bold;color:#3c3489;">StoryTrail</span>
+    <div style="font-size:13px;color:#888780;margin-top:4px;">A bedtime story for ${child.child_name}</div>
+  </div>
+
+  <div style="font-size:16px;line-height:1.7;">
+    ${storyHtml}
+  </div>
+
+  <div style="text-align:center;padding-top:24px;margin-top:24px;border-top:1px solid #e5e3da;font-size:12px;color:#888780;">
+    <p style="margin:0 0 6px;">Sent with care by StoryTrail, every night before bedtime.</p>
+    <p style="margin:0;">Questions or changes? Just reply to this email.</p>
+  </div>
+</div>`;
+}
+
 async function sendStoryEmail(child, story) {
   const { data, error } = await resend.emails.send({
     from: "StoryTrail <stories@adventures.storytrail.shop>",
     to: child.parent_email,
+    replyTo: "storytrailinfo@gmail.com",
     subject: `${child.child_name}'s bedtime story`,
-    text: story,
+    html: buildEmailHtml(child, story),
+    text: story, // plain-text fallback for clients that don't render HTML
   });
 
   if (error) {
@@ -125,6 +153,14 @@ async function runPipeline() {
       console.log("Sending email...");
       await sendStoryEmail(child, story);
       console.log("Email sent.");
+
+      console.log("Saving story...");
+      await supabase.from("stories").insert({
+        child_id: child.id,
+        child_name: child.child_name,
+        story_text: story,
+        send_type: "nightly",
+      });
 
       console.log("Advancing schedule...");
       await advanceSchedule(child.id);
