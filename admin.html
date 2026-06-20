@@ -300,6 +300,51 @@
       word-break: break-word;
     }
 
+    /* ── LOG TABLE ── */
+    #panel-logs { max-width: none; }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .log-table th {
+      text-align: left;
+      padding: 0.6rem 0.9rem;
+      color: var(--periwinkle);
+      font-weight: 500;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(74, 111, 165, 0.3);
+      white-space: nowrap;
+    }
+
+    .log-table td {
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid rgba(74, 111, 165, 0.15);
+      vertical-align: middle;
+    }
+
+    .log-table tr:hover td {
+      background: rgba(74, 111, 165, 0.06);
+    }
+
+    .log-row-error td {
+      border-bottom: none;
+    }
+
+    .log-row-error .error-block {
+      margin: 0 0 0.5rem;
+    }
+
+    .log-name { font-weight: 500; color: var(--cream); }
+    .log-email { color: var(--sky); font-size: 0.8rem; }
+    .log-date { color: var(--periwinkle); white-space: nowrap; font-size: 0.8rem; }
+
+    .log-table .badge { margin-right: 0.35rem; }
+
     @media (max-width: 640px) {
       .layout { flex-direction: column; }
       .sidebar {
@@ -363,7 +408,18 @@
             <button class="sort-btn active" id="logs-filter-all" onclick="setLogsFilter('all')">All</button>
             <button class="sort-btn" id="logs-filter-failed" onclick="setLogsFilter('failed')">Failed only</button>
           </div>
-          <div id="log-list"></div>
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Parent</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="log-list"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -442,7 +498,7 @@
       }
 
       if (panel === 'logs' && !logsLoaded) {
-        document.getElementById('log-list').innerHTML = '<div class="loading">Loading email logs...</div>';
+        document.getElementById('log-list').innerHTML = '<tr><td colspan="5" class="loading">Loading email logs...</td></tr>';
         const result = await fetchFromServer('logs');
         if (result) {
           allLogs = result.logs || [];
@@ -468,7 +524,7 @@
       }
 
       if (!filtered || filtered.length === 0) {
-        listEl.innerHTML = `<div class="empty">${logsFilter === 'failed' ? 'No failed sends. ' : 'No email logs yet.'}</div>`;
+        listEl.innerHTML = `<tr><td colspan="5" class="empty">${logsFilter === 'failed' ? 'No failed sends.' : 'No email logs yet.'}</td></tr>`;
         return;
       }
 
@@ -476,6 +532,12 @@
         const date = new Date(log.created_at).toLocaleDateString('en-US', {
           month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
         });
+
+        const parent = log.children;
+        const parentName = parent && parent.parent_first_name
+          ? `${parent.parent_first_name} ${parent.parent_last_name || ''}`.trim()
+          : log.child_name; // fall back to child name if parent info isn't linked
+
         const statusBadge = log.status === 'success'
           ? '<span class="badge badge-active">Sent</span>'
           : '<span class="badge badge-inactive">Failed</span>';
@@ -487,25 +549,21 @@
           ? `<button class="resend-btn" onclick="resendEmail('${log.id}', '${log.child_id}')" id="resend-btn-${log.id}">Resend</button>`
           : '';
 
-        const errorBlock = log.status === 'failed' && log.error_message
-          ? `<div class="error-block">${escapeHtml(log.error_message)}</div>`
+        const mainRow = `
+          <tr class="${log.status === 'failed' ? 'log-row-error' : ''}">
+            <td class="log-name">${escapeHtml(parentName)}</td>
+            <td class="log-email">${escapeHtml(log.parent_email)}</td>
+            <td>${statusBadge}${typeBadge}</td>
+            <td class="log-date">${date}</td>
+            <td>${resendBtn}</td>
+          </tr>
+        `;
+
+        const errorRow = log.status === 'failed' && log.error_message
+          ? `<tr><td colspan="5"><div class="error-block">${escapeHtml(log.error_message)}</div></td></tr>`
           : '';
 
-        return `
-          <div class="item-card" style="cursor: default;">
-            <div class="item-card-header">
-              <div>
-                <div class="item-card-title">${escapeHtml(log.child_name)}</div>
-                <div class="item-card-sub">${escapeHtml(log.parent_email)}</div>
-              </div>
-              <div class="item-card-meta">${date}</div>
-            </div>
-            <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-              ${statusBadge}${typeBadge}${resendBtn}
-            </div>
-            ${errorBlock}
-          </div>
-        `;
+        return mainRow + errorRow;
       }).join('');
     }
 
