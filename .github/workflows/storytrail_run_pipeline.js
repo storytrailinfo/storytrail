@@ -176,7 +176,8 @@ function buildEmailHtml(child, story) {
   </div>
 
   <div style="text-align:center;padding-top:24px;margin-top:24px;border-top:1px solid #e5e3da;font-size:12px;color:#888780;">
-    <p style="margin:0 0 6px;">Sent with care by StoryTrail, every night before bedtime.</p>
+    <p style="margin:0 0 10px;">Sent with care by StoryTrail, every night before bedtime.</p>
+    <p style="margin:0 0 10px;">Has ${child.child_name}'s interests changed? <a href="https://storytrail.shop/update-preferences.html?id=${child.id}" style="color:#3c3489;">Update their favorites here</a> and tomorrow's story will follow along.</p>
     <p style="margin:0;">Questions or changes? Just reply to this email.</p>
   </div>
 </div>`;
