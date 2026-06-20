@@ -271,6 +271,28 @@
       color: var(--gold);
     }
 
+    .search-input {
+      display: block;
+      width: 100%;
+      max-width: 360px;
+      margin-bottom: 0.9rem;
+      background: rgba(8, 12, 36, 0.6);
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      font-size: 0.88rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input::placeholder { color: rgba(74, 111, 165, 0.6); }
+
+    .search-input:focus {
+      border-color: rgba(200, 216, 240, 0.6);
+    }
+
     .resend-btn {
       background: rgba(240, 192, 96, 0.1);
       border: 1px solid rgba(240, 192, 96, 0.4);
@@ -502,10 +524,13 @@
 
         <div class="panel" id="panel-users">
           <h1>Users</h1>
+          <input type="text" class="search-input" id="users-search" placeholder="Search by name or email..." oninput="renderUsers()" />
           <div class="sort-bar">
             <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
             <button class="sort-btn active" id="users-sort-newest" onclick="setUsersSort('newest')">Newest first</button>
             <button class="sort-btn" id="users-sort-oldest" onclick="setUsersSort('oldest')">Oldest first</button>
+            <button class="sort-btn" id="users-sort-name" onclick="setUsersSort('name')">Name A–Z</button>
+            <button class="sort-btn" id="users-sort-email" onclick="setUsersSort('email')">Email A–Z</button>
           </div>
           <table class="log-table">
             <thead>
@@ -804,6 +829,8 @@
       usersSort = sort;
       document.getElementById('users-sort-newest').classList.toggle('active', sort === 'newest');
       document.getElementById('users-sort-oldest').classList.toggle('active', sort === 'oldest');
+      document.getElementById('users-sort-name').classList.toggle('active', sort === 'name');
+      document.getElementById('users-sort-email').classList.toggle('active', sort === 'email');
       renderUsers();
     }
 
@@ -836,13 +863,39 @@
         return;
       }
 
-      const sorted = [...allUsers].sort((a, b) => {
+      // Pre-compute display name once per user, since both search and
+      // the "Name A-Z" sort need it.
+      const withNames = allUsers.map(user => ({
+        ...user,
+        _displayName: `${user.parent_first_name || ''} ${user.parent_last_name || ''}`.trim() || 'Unnamed parent',
+      }));
+
+      const searchTerm = (document.getElementById('users-search').value || '').trim().toLowerCase();
+      const filtered = searchTerm
+        ? withNames.filter(u =>
+            u._displayName.toLowerCase().includes(searchTerm) ||
+            (u.parent_email || '').toLowerCase().includes(searchTerm)
+          )
+        : withNames;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<tr><td colspan="5" class="empty">No users match that search.</td></tr>';
+        return;
+      }
+
+      const sorted = [...filtered].sort((a, b) => {
+        if (usersSort === 'name') {
+          return a._displayName.localeCompare(b._displayName);
+        }
+        if (usersSort === 'email') {
+          return (a.parent_email || '').localeCompare(b.parent_email || '');
+        }
         const diff = new Date(a.created_at) - new Date(b.created_at);
         return usersSort === 'newest' ? -diff : diff;
       });
 
       listEl.innerHTML = sorted.map((user, i) => {
-        const parentName = `${user.parent_first_name || ''} ${user.parent_last_name || ''}`.trim() || 'Unnamed parent';
+        const parentName = user._displayName;
         const statusBadge = user.active
           ? '<span class="badge badge-active">Active</span>'
           : '<span class="badge badge-inactive">Inactive</span>';
