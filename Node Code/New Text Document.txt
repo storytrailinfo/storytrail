@@ -1,0 +1,19 @@
+$publishableKey = "sb_publishable_THFfVECYJDIG_B6XPJkWig_jnIEcBS2"
+$url = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/enroll-child"
+
+$body = @{
+  parent_email    = "kdubose89@gmail.com"
+  child_name      = "TestKid"
+  child_age       = 6
+  favorite_color  = "green"
+  favorite_animal = "owl"
+  theme_tags      = @("space")
+  timezone        = "America/New_York"
+} | ConvertTo-Json
+
+$headers = @{
+  "Authorization" = "Bearer $publishableKey"
+  "apikey"        = $publishableKey
+}
+
+Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers $headers

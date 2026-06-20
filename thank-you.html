@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>You're In! – StoryTrail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --midnight: #080C24;
+      --deep-navy: #0C1540;
+      --periwinkle: #4A6FA5;
+      --sky: #7BA7D4;
+      --moon-glow: #C8D8F0;
+      --cream: #EEF2FF;
+      --gold: #F0C060;
+      --gold-light: #FDE68A;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--midnight);
+      color: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon-container {
+      position: fixed;
+      top: -40px;
+      right: 6%;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #EEF4FF 0%, #C8D8F0 35%, #9DB8E0 65%, #6A8FC0 100%);
+      box-shadow:
+        0 0 60px 20px rgba(200, 216, 240, 0.25),
+        0 0 120px 50px rgba(200, 216, 240, 0.12),
+        inset -30px -20px 60px rgba(60, 80, 140, 0.4);
+      animation: moonFloat 8s ease-in-out infinite;
+    }
+
+    .moon::before {
+      content: '';
+      position: absolute;
+      top: 18%; left: 22%;
+      width: 35px; height: 35px;
+      border-radius: 50%;
+      background: rgba(150, 170, 210, 0.35);
+    }
+
+    .moon::after {
+      content: '';
+      position: absolute;
+      top: 45%; left: 55%;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: rgba(150, 170, 210, 0.25);
+    }
+
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(2deg); }
+      50% { transform: translateY(-18px) rotate(-1deg); }
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--deep-navy);
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      border-radius: 28px;
+      padding: 2.75rem 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.9rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 0.92rem;
+      color: var(--sky);
+      line-height: 1.65;
+      font-weight: 300;
+      margin-bottom: 2rem;
+    }
+
+    .steps {
+      text-align: left;
+      border-top: 1px solid rgba(74, 111, 165, 0.25);
+      padding-top: 1.75rem;
+    }
+
+    .steps-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .step {
+      display: flex;
+      gap: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(240, 192, 96, 0.15);
+      border: 1px solid rgba(240, 192, 96, 0.4);
+      color: var(--gold);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-text h3 {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--moon-glow);
+      margin-bottom: 0.25rem;
+    }
+
+    .step-text p {
+      font-size: 0.85rem;
+      color: var(--sky);
+      line-height: 1.55;
+      font-weight: 300;
+    }
+
+    .why-note {
+      margin-top: 1.75rem;
+      padding: 1rem 1.1rem;
+      background: rgba(74, 111, 165, 0.12);
+      border: 1px solid rgba(74, 111, 165, 0.25);
+      border-radius: 14px;
+      font-size: 0.8rem;
+      color: var(--sky);
+      line-height: 1.6;
+      font-weight: 300;
+      text-align: left;
+    }
+
+    .why-note strong {
+      color: var(--moon-glow);
+      font-weight: 500;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: var(--periwinkle);
+      text-decoration: none;
+      font-size: 0.82rem;
+    }
+
+    .back-link:hover { color: var(--cream); }
+
+    @media (max-width: 540px) {
+      .card { padding: 2rem 1.5rem; }
+      .moon-container { width: 130px; height: 130px; top: -20px; right: -10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+  <div class="moon-container">
+    <div class="moon"></div>
+  </div>
+
+  <div class="card">
+    <div class="success-icon">🌟</div>
+    <h1>You're in!</h1>
+    <p class="subtitle">Your child's first StoryTrail adventure arrives tomorrow evening. Here's how to make sure it lands right where you'll see it.</p>
+
+    <div class="steps">
+      <p class="steps-label">Three quick things</p>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <h3>Find it, then move it to your main inbox</h3>
+          <p>If it lands in Promotions or another tab, drag it into your Primary inbox.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <h3>Star it</h3>
+          <p>One tap tells your inbox this is something you actually want to see.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <h3>Reply with anything</h3>
+          <p>Even just "got it!" helps a lot. A quick reply is one of the strongest signals we're someone worth hearing from.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="why-note">
+      <strong>Why this matters:</strong> we're a brand-new sender, and email providers are cautious with anyone new. Moving, starring, and replying to that first email helps teach inboxes everywhere that StoryTrail is welcome — so your story (and everyone else's) shows up reliably every night, not buried in a folder no one checks.
+    </div>
+
+    <a href="storytrail.html" class="back-link">&larr; Back to StoryTrail</a>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.4 + 0.2,
+          alpha: Math.random(),
+          speed: Math.random() * 0.008 + 0.002,
+          dir: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed * s.dir;
+        if (s.alpha > 1 || s.alpha < 0.1) s.dir *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 216, 240, ${s.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    drawStars();
+  </script>
+</body>
+</html>
