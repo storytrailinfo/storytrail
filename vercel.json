@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/enroll", "destination": "/enroll.html" },
+    { "source": "/thank-you", "destination": "/thank-you.html" },
+    { "source": "/update-preferences", "destination": "/update-preferences.html" }
+  ]
+}
