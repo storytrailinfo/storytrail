@@ -825,12 +825,29 @@
       }
     }
 
+    let usersSortDirection = 'asc'; // only meaningful for 'name' and 'email' sorts
+
     function setUsersSort(sort) {
+      // Clicking the same alphabetical sort twice reverses direction.
+      // Newest/Oldest already function as their own pair, so this only
+      // applies to 'name' and 'email'.
+      if ((sort === 'name' || sort === 'email') && usersSort === sort) {
+        usersSortDirection = usersSortDirection === 'asc' ? 'desc' : 'asc';
+      } else if (sort === 'name' || sort === 'email') {
+        usersSortDirection = 'asc';
+      }
+
       usersSort = sort;
       document.getElementById('users-sort-newest').classList.toggle('active', sort === 'newest');
       document.getElementById('users-sort-oldest').classList.toggle('active', sort === 'oldest');
       document.getElementById('users-sort-name').classList.toggle('active', sort === 'name');
       document.getElementById('users-sort-email').classList.toggle('active', sort === 'email');
+
+      document.getElementById('users-sort-name').textContent =
+        (sort === 'name' && usersSortDirection === 'desc') ? 'Name Z–A' : 'Name A–Z';
+      document.getElementById('users-sort-email').textContent =
+        (sort === 'email' && usersSortDirection === 'desc') ? 'Email Z–A' : 'Email A–Z';
+
       renderUsers();
     }
 
@@ -885,10 +902,12 @@
 
       const sorted = [...filtered].sort((a, b) => {
         if (usersSort === 'name') {
-          return a._displayName.localeCompare(b._displayName);
+          const cmp = a._displayName.localeCompare(b._displayName);
+          return usersSortDirection === 'desc' ? -cmp : cmp;
         }
         if (usersSort === 'email') {
-          return (a.parent_email || '').localeCompare(b.parent_email || '');
+          const cmp = (a.parent_email || '').localeCompare(b.parent_email || '');
+          return usersSortDirection === 'desc' ? -cmp : cmp;
         }
         const diff = new Date(a.created_at) - new Date(b.created_at);
         return usersSort === 'newest' ? -diff : diff;
