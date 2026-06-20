@@ -391,11 +391,30 @@
       margin: 0 0 0.5rem;
     }
 
-    .log-name { font-weight: 500; color: var(--cream); }
+    .log-name {
+      font-weight: 500;
+      color: var(--cream);
+      min-width: 220px;
+      white-space: nowrap;
+    }
     .log-email { color: var(--sky); font-size: 0.8rem; }
     .log-date { color: var(--periwinkle); white-space: nowrap; font-size: 0.8rem; }
 
     .log-table .badge { margin-right: 0.35rem; }
+
+    .email-content-scroll {
+      max-height: 700px;
+      overflow-y: auto;
+      padding: 1rem 1.1rem;
+      background: rgba(8, 12, 36, 0.4);
+      border: 1px solid rgba(74, 111, 165, 0.2);
+      border-radius: 10px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--moon-glow);
+      white-space: pre-wrap;
+    }
 
     /* ── DASHBOARD ── */
     #panel-dashboard { max-width: none; }
@@ -463,7 +482,6 @@
         <div class="sidebar-logo">Admin</div>
         <button class="nav-item active" id="nav-dashboard" onclick="switchPanel('dashboard')">Dashboard</button>
         <button class="nav-item" id="nav-users" onclick="switchPanel('users')">Users</button>
-        <button class="nav-item" id="nav-stories" onclick="switchPanel('stories')">Stories</button>
         <button class="nav-item" id="nav-logs" onclick="switchPanel('logs')">Email Logs</button>
       </div>
 
@@ -503,16 +521,6 @@
           </table>
         </div>
 
-        <div class="panel" id="panel-stories">
-          <h1>Stories</h1>
-          <div class="sort-bar">
-            <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
-            <button class="sort-btn active" id="stories-sort-newest" onclick="setStoriesSort('newest')">Newest first</button>
-            <button class="sort-btn" id="stories-sort-oldest" onclick="setStoriesSort('oldest')">Oldest first</button>
-          </div>
-          <div id="story-list"></div>
-        </div>
-
         <div class="panel" id="panel-logs">
           <h1>Email Logs</h1>
           <div class="sort-bar">
@@ -546,13 +554,10 @@
 
     let adminPassword = '';
     let allUsers = [];
-    let allStories = [];
     let allLogs = [];
     let usersSort = 'newest';
-    let storiesSort = 'newest';
     let logsFilter = 'all';
     let dashPeriod = 'all';
-    let storiesLoaded = false;
     let logsLoaded = false;
 
     async function checkPassword() {
@@ -602,11 +607,9 @@
     async function switchPanel(panel) {
       document.getElementById('nav-dashboard').classList.toggle('active', panel === 'dashboard');
       document.getElementById('nav-users').classList.toggle('active', panel === 'users');
-      document.getElementById('nav-stories').classList.toggle('active', panel === 'stories');
       document.getElementById('nav-logs').classList.toggle('active', panel === 'logs');
       document.getElementById('panel-dashboard').classList.toggle('active', panel === 'dashboard');
       document.getElementById('panel-users').classList.toggle('active', panel === 'users');
-      document.getElementById('panel-stories').classList.toggle('active', panel === 'stories');
       document.getElementById('panel-logs').classList.toggle('active', panel === 'logs');
 
       if (panel === 'users' && allUsers.length === 0) {
@@ -615,16 +618,6 @@
         if (result) {
           allUsers = result.users || [];
           renderUsers();
-        }
-      }
-
-      if (panel === 'stories' && !storiesLoaded) {
-        document.getElementById('story-list').innerHTML = '<div class="loading">Loading stories...</div>';
-        const result = await fetchFromServer('stories');
-        if (result) {
-          allStories = result.stories || [];
-          storiesLoaded = true;
-          renderStories();
         }
       }
 
@@ -710,7 +703,7 @@
         return;
       }
 
-      listEl.innerHTML = filtered.map((log) => {
+      listEl.innerHTML = filtered.map((log, i) => {
         const date = new Date(log.created_at).toLocaleDateString('en-US', {
           month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
         });
@@ -728,11 +721,11 @@
           : '<span class="badge badge-nightly">Nightly</span>';
 
         const resendBtn = log.child_id
-          ? `<button class="resend-btn" onclick="resendEmail('${log.id}', '${log.child_id}')" id="resend-btn-${log.id}">Resend</button>`
+          ? `<button class="resend-btn" onclick="event.stopPropagation(); resendEmail('${log.id}', '${log.child_id}')" id="resend-btn-${log.id}">Resend</button>`
           : '';
 
         const mainRow = `
-          <tr class="${log.status === 'failed' ? 'log-row-error' : ''}">
+          <tr class="${log.status === 'failed' ? 'log-row-error' : ''}" onclick="toggleItem('log-detail-${i}')" style="cursor: pointer;">
             <td class="log-name">${escapeHtml(parentName)}</td>
             <td class="log-email">${escapeHtml(log.parent_email)}</td>
             <td>${typeBadge}</td>
@@ -742,11 +735,27 @@
           </tr>
         `;
 
-        const errorRow = log.status === 'failed' && log.error_message
-          ? `<tr><td colspan="6"><div class="error-block">${escapeHtml(log.error_message)}</div></td></tr>`
-          : '';
+        // Successful sends with a linked story: show the scrollable email
+        // content. Failed sends (or any row with no linked story): show
+        // the error message instead, same as before.
+        const story = log.stories;
+        const expandedContent = story && story.story_text
+          ? `<div class="email-content-scroll">${escapeHtml(story.story_text)}</div>`
+          : log.error_message
+            ? `<div class="error-block">${escapeHtml(log.error_message)}</div>`
+            : `<div class="empty" style="padding: 1rem 0;">No content available for this entry.</div>`;
 
-        return mainRow + errorRow;
+        const detailRow = `
+          <tr>
+            <td colspan="6" style="padding: 0;">
+              <div class="item-full" id="log-detail-${i}" style="margin: 0; padding: 0.75rem 0.9rem;">
+                ${expandedContent}
+              </div>
+            </td>
+          </tr>
+        `;
+
+        return mainRow + detailRow;
       }).join('');
     }
 
@@ -797,13 +806,6 @@
       document.getElementById('users-sort-newest').classList.toggle('active', sort === 'newest');
       document.getElementById('users-sort-oldest').classList.toggle('active', sort === 'oldest');
       renderUsers();
-    }
-
-    function setStoriesSort(sort) {
-      storiesSort = sort;
-      document.getElementById('stories-sort-newest').classList.toggle('active', sort === 'newest');
-      document.getElementById('stories-sort-oldest').classList.toggle('active', sort === 'oldest');
-      renderStories();
     }
 
     function daysSince(dateStr) {
@@ -934,51 +936,6 @@
         btn.textContent = 'Copied!';
         setTimeout(() => { btn.textContent = originalText; }, 1500);
       });
-    }
-
-    function renderStories() {
-      const listEl = document.getElementById('story-list');
-
-      if (!allStories || allStories.length === 0) {
-        listEl.innerHTML = '<div class="empty">No stories yet.</div>';
-        return;
-      }
-
-      const sorted = [...allStories].sort((a, b) => {
-        const diff = new Date(a.created_at) - new Date(b.created_at);
-        return storiesSort === 'newest' ? -diff : diff;
-      });
-
-      listEl.innerHTML = sorted.map((story, i) => {
-        const date = new Date(story.created_at).toLocaleDateString('en-US', {
-          month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
-        });
-        const badgeClass = story.send_type === 'welcome' ? 'badge-welcome' : 'badge-nightly';
-        const badgeLabel = story.send_type === 'welcome' ? 'Welcome' : 'Nightly';
-
-        const parent = story.children;
-        const parentName = parent && parent.parent_first_name
-          ? `${parent.parent_first_name} ${parent.parent_last_name || ''}`.trim()
-          : null;
-        const titleText = parentName
-          ? `${parentName} — ${story.child_name}`
-          : story.child_name;
-
-        return `
-          <div class="item-card" onclick="toggleItem('story-${i}')">
-            <div class="item-card-header">
-              <div class="item-card-title">${escapeHtml(titleText)}</div>
-              <div class="item-card-meta">${date}</div>
-            </div>
-            <div style="margin-top: 0.4rem;">
-              <span class="badge ${badgeClass}">${badgeLabel}</span>
-            </div>
-            <div class="item-full" id="story-${i}">
-              <div class="story-text">${escapeHtml(story.story_text)}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
     }
 
     function toggleItem(id) {
