@@ -308,6 +308,38 @@
       color: var(--cream);
     }
 
+    .unsubscribe-btn {
+      display: block;
+      margin-top: 0.6rem;
+      width: 100%;
+      background: rgba(226, 75, 74, 0.08);
+      border: 1px solid rgba(226, 75, 74, 0.3);
+      color: #F09595;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      padding: 0.55rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .unsubscribe-btn:hover:not(:disabled) {
+      background: rgba(226, 75, 74, 0.16);
+    }
+
+    .unsubscribe-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .already-inactive {
+      margin-top: 0.6rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--periwinkle);
+      padding: 0.5rem;
+    }
+
     .error-block {
       margin-top: 0.6rem;
       padding: 0.6rem 0.8rem;
@@ -365,6 +397,40 @@
 
     .log-table .badge { margin-right: 0.35rem; }
 
+    /* ── DASHBOARD ── */
+    #panel-dashboard { max-width: none; }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--deep-navy);
+      border: 1px solid rgba(74, 111, 165, 0.3);
+      border-radius: 16px;
+      padding: 1.25rem 1.4rem;
+    }
+
+    .stat-card-label {
+      font-size: 0.75rem;
+      color: var(--periwinkle);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-card-value {
+      font-family: 'Crimson Pro', serif;
+      font-size: 2rem;
+      color: var(--cream);
+    }
+
+    .stat-card-value.stat-good { color: #97C459; }
+    .stat-card-value.stat-bad { color: #F09595; }
+
     @media (max-width: 640px) {
       .layout { flex-direction: column; }
       .sidebar {
@@ -395,13 +461,28 @@
     <div class="layout">
       <div class="sidebar">
         <div class="sidebar-logo">Admin</div>
-        <button class="nav-item active" id="nav-users" onclick="switchPanel('users')">Users</button>
+        <button class="nav-item active" id="nav-dashboard" onclick="switchPanel('dashboard')">Dashboard</button>
+        <button class="nav-item" id="nav-users" onclick="switchPanel('users')">Users</button>
         <button class="nav-item" id="nav-stories" onclick="switchPanel('stories')">Stories</button>
         <button class="nav-item" id="nav-logs" onclick="switchPanel('logs')">Email Logs</button>
       </div>
 
       <div class="main">
-        <div class="panel active" id="panel-users">
+        <div class="panel active" id="panel-dashboard">
+          <h1>Dashboard</h1>
+          <div class="sort-bar">
+            <span style="color: var(--periwinkle); font-size: 0.85rem;">Period:</span>
+            <button class="sort-btn" id="dash-period-day" onclick="setDashPeriod('day')">Today</button>
+            <button class="sort-btn" id="dash-period-week" onclick="setDashPeriod('week')">7 days</button>
+            <button class="sort-btn" id="dash-period-month" onclick="setDashPeriod('month')">30 days</button>
+            <button class="sort-btn active" id="dash-period-all" onclick="setDashPeriod('all')">All time</button>
+          </div>
+          <div class="stat-grid" id="dash-stat-grid">
+            <div class="loading">Loading dashboard...</div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-users">
           <h1>Users</h1>
           <div class="sort-bar">
             <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
@@ -460,6 +541,7 @@
   <script>
     const EDGE_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/get-stories";
     const RESEND_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/resend-email";
+    const UNSUBSCRIBE_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/unsubscribe-child";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_THFfVECYJDIG_B6XPJkWig_jnIEcBS2";
 
     let adminPassword = '';
@@ -469,6 +551,7 @@
     let usersSort = 'newest';
     let storiesSort = 'newest';
     let logsFilter = 'all';
+    let dashPeriod = 'all';
     let storiesLoaded = false;
     let logsLoaded = false;
 
@@ -489,10 +572,15 @@
 
       document.getElementById('gate').style.display = 'none';
       document.getElementById('app').style.display = 'block';
-      renderUsers();
+
+      // Load the dashboard immediately since it's the default landing panel
+      const dashResult = await fetchFromServer('dashboard', null, dashPeriod);
+      if (dashResult) {
+        renderDashboard(dashResult.dashboard);
+      }
     }
 
-    async function fetchFromServer(view, passwordOverride) {
+    async function fetchFromServer(view, passwordOverride, period) {
       try {
         const response = await fetch(EDGE_FUNCTION_URL, {
           method: 'POST',
@@ -501,7 +589,7 @@
             'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
             'apikey': SUPABASE_PUBLISHABLE_KEY,
           },
-          body: JSON.stringify({ password: passwordOverride || adminPassword, view }),
+          body: JSON.stringify({ password: passwordOverride || adminPassword, view, period }),
         });
 
         if (!response.ok) return null;
@@ -512,12 +600,23 @@
     }
 
     async function switchPanel(panel) {
+      document.getElementById('nav-dashboard').classList.toggle('active', panel === 'dashboard');
       document.getElementById('nav-users').classList.toggle('active', panel === 'users');
       document.getElementById('nav-stories').classList.toggle('active', panel === 'stories');
       document.getElementById('nav-logs').classList.toggle('active', panel === 'logs');
+      document.getElementById('panel-dashboard').classList.toggle('active', panel === 'dashboard');
       document.getElementById('panel-users').classList.toggle('active', panel === 'users');
       document.getElementById('panel-stories').classList.toggle('active', panel === 'stories');
       document.getElementById('panel-logs').classList.toggle('active', panel === 'logs');
+
+      if (panel === 'users' && allUsers.length === 0) {
+        document.getElementById('user-list').innerHTML = '<tr><td colspan="5" class="loading">Loading users...</td></tr>';
+        const result = await fetchFromServer('users');
+        if (result) {
+          allUsers = result.users || [];
+          renderUsers();
+        }
+      }
 
       if (panel === 'stories' && !storiesLoaded) {
         document.getElementById('story-list').innerHTML = '<div class="loading">Loading stories...</div>';
@@ -538,6 +637,57 @@
           renderLogs();
         }
       }
+    }
+
+    async function setDashPeriod(period) {
+      dashPeriod = period;
+      ['day', 'week', 'month', 'all'].forEach(p => {
+        document.getElementById(`dash-period-${p}`).classList.toggle('active', p === period);
+      });
+      document.getElementById('dash-stat-grid').innerHTML = '<div class="loading">Loading dashboard...</div>';
+      const result = await fetchFromServer('dashboard', null, period);
+      if (result) {
+        renderDashboard(result.dashboard);
+      }
+    }
+
+    function renderDashboard(stats) {
+      const gridEl = document.getElementById('dash-stat-grid');
+      if (!stats) {
+        gridEl.innerHTML = '<div class="empty">Couldn\'t load dashboard stats.</div>';
+        return;
+      }
+
+      const rateClass = stats.successRate === null
+        ? ''
+        : stats.successRate >= 95 ? 'stat-good' : stats.successRate < 80 ? 'stat-bad' : '';
+
+      gridEl.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card-label">Active subscribers</div>
+          <div class="stat-card-value">${stats.activeSubscribers}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Unsubscribed</div>
+          <div class="stat-card-value">${stats.inactiveSubscribers}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">New signups</div>
+          <div class="stat-card-value">${stats.newSignups}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Emails sent</div>
+          <div class="stat-card-value">${stats.emailsSent}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Emails failed</div>
+          <div class="stat-card-value ${stats.emailsFailed > 0 ? 'stat-bad' : ''}">${stats.emailsFailed}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Success rate</div>
+          <div class="stat-card-value ${rateClass}">${stats.successRate === null ? '—' : stats.successRate + '%'}</div>
+        </div>
+      `;
     }
 
     function setLogsFilter(filter) {
@@ -721,6 +871,10 @@
                 <div class="detail-row"><span class="detail-label">Stories generated</span><span class="detail-value">${user.story_count}</span></div>
                 <div class="detail-row"><span class="detail-label">Subscribed since</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span></div>
                 <button class="copy-link-btn" id="copy-btn-${i}" onclick="event.stopPropagation(); copyPreferencesLink('${user.id}', ${i})">Copy update-preferences link</button>
+                ${user.active
+                  ? `<button class="unsubscribe-btn" id="unsub-btn-${i}" onclick="event.stopPropagation(); unsubscribeUser('${user.id}', ${i}, '${escapeHtml(user.child_name)}')">Unsubscribe from emails</button>`
+                  : `<div class="already-inactive">This child is already unsubscribed.</div>`
+                }
               </div>
             </td>
           </tr>
@@ -728,6 +882,48 @@
 
         return mainRow + detailRow;
       }).join('');
+    }
+
+    async function unsubscribeUser(childId, i, childName) {
+      const confirmed = confirm(`Unsubscribe ${childName} from StoryTrail emails? They'll stop receiving nightly stories until reactivated.`);
+      if (!confirmed) return;
+
+      const btn = document.getElementById(`unsub-btn-${i}`);
+      btn.disabled = true;
+      btn.textContent = 'Unsubscribing...';
+
+      try {
+        const response = await fetch(UNSUBSCRIBE_FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ password: adminPassword, child_id: childId }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert(result.error || 'Something went wrong. Please try again.');
+          btn.disabled = false;
+          btn.textContent = 'Unsubscribe from emails';
+          return;
+        }
+
+        // Refresh the users list so the row reflects the new inactive status
+        const refreshed = await fetchFromServer('users');
+        if (refreshed) {
+          allUsers = refreshed.users || [];
+          renderUsers();
+        }
+
+      } catch (err) {
+        alert('Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Unsubscribe from emails';
+      }
     }
 
     function copyPreferencesLink(childId, i) {
