@@ -444,6 +444,7 @@
               <tr>
                 <th>Parent</th>
                 <th>Email</th>
+                <th>Type</th>
                 <th>Status</th>
                 <th>Date</th>
                 <th></th>
@@ -529,7 +530,7 @@
       }
 
       if (panel === 'logs' && !logsLoaded) {
-        document.getElementById('log-list').innerHTML = '<tr><td colspan="5" class="loading">Loading email logs...</td></tr>';
+        document.getElementById('log-list').innerHTML = '<tr><td colspan="6" class="loading">Loading email logs...</td></tr>';
         const result = await fetchFromServer('logs');
         if (result) {
           allLogs = result.logs || [];
@@ -555,7 +556,7 @@
       }
 
       if (!filtered || filtered.length === 0) {
-        listEl.innerHTML = `<tr><td colspan="5" class="empty">${logsFilter === 'failed' ? 'No failed sends.' : 'No email logs yet.'}</td></tr>`;
+        listEl.innerHTML = `<tr><td colspan="6" class="empty">${logsFilter === 'failed' ? 'No failed sends.' : 'No email logs yet.'}</td></tr>`;
         return;
       }
 
@@ -584,14 +585,15 @@
           <tr class="${log.status === 'failed' ? 'log-row-error' : ''}">
             <td class="log-name">${escapeHtml(parentName)}</td>
             <td class="log-email">${escapeHtml(log.parent_email)}</td>
-            <td>${statusBadge}${typeBadge}</td>
+            <td>${typeBadge}</td>
+            <td>${statusBadge}</td>
             <td class="log-date">${date}</td>
             <td>${resendBtn}</td>
           </tr>
         `;
 
         const errorRow = log.status === 'failed' && log.error_message
-          ? `<tr><td colspan="5"><div class="error-block">${escapeHtml(log.error_message)}</div></td></tr>`
+          ? `<tr><td colspan="6"><div class="error-block">${escapeHtml(log.error_message)}</div></td></tr>`
           : '';
 
         return mainRow + errorRow;
