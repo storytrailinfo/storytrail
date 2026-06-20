@@ -157,6 +157,30 @@
       color: var(--periwinkle);
       padding: 2rem 0;
     }
+
+    .sort-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .sort-btn {
+      background: none;
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      color: var(--sky);
+      font-size: 0.8rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 100px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .sort-btn.active {
+      background: rgba(240, 192, 96, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
   </style>
 </head>
 <body>
@@ -172,6 +196,11 @@
     </div>
 
     <div id="content">
+      <div class="sort-bar" id="sort-bar">
+        <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
+        <button class="sort-btn active" id="sort-newest" onclick="setSort('newest')">Newest first</button>
+        <button class="sort-btn" id="sort-oldest" onclick="setSort('oldest')">Oldest first</button>
+      </div>
       <div id="story-list"></div>
     </div>
   </div>
@@ -180,6 +209,9 @@
     const EDGE_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/get-stories";
     // Same publishable key used on the enrollment page -- safe to expose
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_THFfVECYJDIG_B6XPJkWig_jnIEcBS2";
+
+    let allStories = [];
+    let currentSort = 'newest';
 
     async function checkPassword() {
       const password = document.getElementById('password-input').value;
@@ -211,32 +243,53 @@
           return;
         }
 
-        renderStories(result.stories);
+        allStories = result.stories || [];
+        renderStories();
 
       } catch (err) {
         document.getElementById('story-list').innerHTML = '<div class="empty">Something went wrong. Please try again.</div>';
       }
     }
 
-    function renderStories(stories) {
+    function setSort(sort) {
+      currentSort = sort;
+      document.getElementById('sort-newest').classList.toggle('active', sort === 'newest');
+      document.getElementById('sort-oldest').classList.toggle('active', sort === 'oldest');
+      renderStories();
+    }
+
+    function renderStories() {
       const listEl = document.getElementById('story-list');
 
-      if (!stories || stories.length === 0) {
+      if (!allStories || allStories.length === 0) {
         listEl.innerHTML = '<div class="empty">No stories yet.</div>';
         return;
       }
 
-      listEl.innerHTML = stories.map((story, i) => {
+      const sorted = [...allStories].sort((a, b) => {
+        const diff = new Date(a.created_at) - new Date(b.created_at);
+        return currentSort === 'newest' ? -diff : diff;
+      });
+
+      listEl.innerHTML = sorted.map((story, i) => {
         const date = new Date(story.created_at).toLocaleDateString('en-US', {
           month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
         });
         const badgeClass = story.send_type === 'welcome' ? 'badge-welcome' : 'badge-nightly';
         const badgeLabel = story.send_type === 'welcome' ? 'Welcome' : 'Nightly';
 
+        const parent = story.children;
+        const parentName = parent && parent.parent_first_name
+          ? `${parent.parent_first_name} ${parent.parent_last_name || ''}`.trim()
+          : null;
+        const titleText = parentName
+          ? `${parentName} — ${story.child_name}`
+          : story.child_name;
+
         return `
           <div class="story-card" onclick="toggleStory(${i})">
             <div class="story-card-header">
-              <div class="story-card-title">${escapeHtml(story.child_name)}</div>
+              <div class="story-card-title">${escapeHtml(titleText)}</div>
               <div class="story-card-meta">${date}</div>
             </div>
             <div style="margin-top: 0.4rem;">
