@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Story Archive – StoryTrail Admin</title>
+  <title>Admin – StoryTrail</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,31 +25,23 @@
       background: var(--midnight);
       color: var(--cream);
       min-height: 100vh;
-      padding: 2rem 1rem;
     }
 
-    .wrap {
-      max-width: 720px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      font-family: 'Crimson Pro', serif;
-      font-size: 1.8rem;
-      font-weight: 400;
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-
-    /* Password gate */
     .gate {
       max-width: 360px;
-      margin: 4rem auto;
+      margin: 6rem auto;
       background: var(--deep-navy);
       border: 1px solid rgba(74, 111, 165, 0.4);
       border-radius: 20px;
       padding: 2rem;
       text-align: center;
+    }
+
+    .gate h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
     }
 
     .gate input {
@@ -82,34 +74,101 @@
       display: none;
     }
 
-    /* Story list */
-    #content { display: none; }
+    #app { display: none; min-height: 100vh; }
 
-    .story-card {
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 200px;
+      flex-shrink: 0;
+      background: var(--deep-navy);
+      border-right: 1px solid rgba(74, 111, 165, 0.25);
+      padding: 1.5rem 1rem;
+    }
+
+    .sidebar-logo {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      padding: 0 0.5rem;
+    }
+
+    .nav-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--sky);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 0.4rem;
+    }
+
+    .nav-item.active {
+      background: rgba(240, 192, 96, 0.12);
+      color: var(--gold);
+      font-weight: 500;
+    }
+
+    .nav-item:hover:not(.active) {
+      background: rgba(74, 111, 165, 0.12);
+      color: var(--cream);
+    }
+
+    .main {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: 800px;
+    }
+
+    .main h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .item-card {
       background: var(--deep-navy);
       border: 1px solid rgba(74, 111, 165, 0.3);
       border-radius: 16px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1rem;
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 0.85rem;
       cursor: pointer;
     }
 
-    .story-card-header {
+    .item-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 1rem;
+      flex-wrap: wrap;
     }
 
-    .story-card-title {
+    .item-card-title {
       font-family: 'Crimson Pro', serif;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
     }
 
-    .story-card-meta {
+    .item-card-sub {
+      font-size: 0.8rem;
+      color: var(--sky);
+      margin-top: 0.2rem;
+    }
+
+    .item-card-meta {
       font-size: 0.78rem;
       color: var(--periwinkle);
       white-space: nowrap;
+      text-align: right;
+      line-height: 1.5;
     }
 
     .badge {
@@ -134,17 +193,45 @@
       border: 1px solid rgba(74, 111, 165, 0.35);
     }
 
-    .story-full {
+    .badge-active {
+      background: rgba(99, 153, 34, 0.15);
+      color: #97C459;
+      border: 1px solid rgba(99, 153, 34, 0.4);
+    }
+
+    .badge-inactive {
+      background: rgba(226, 75, 74, 0.12);
+      color: #F09595;
+      border: 1px solid rgba(226, 75, 74, 0.35);
+    }
+
+    .item-full {
       display: none;
       margin-top: 1rem;
       padding-top: 1rem;
       border-top: 1px solid rgba(74, 111, 165, 0.2);
+    }
+
+    .story-text {
       font-family: 'Crimson Pro', serif;
       font-size: 1.02rem;
       line-height: 1.75;
       color: var(--moon-glow);
       white-space: pre-wrap;
     }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid rgba(74, 111, 165, 0.15);
+      font-size: 0.88rem;
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+
+    .detail-label { color: var(--periwinkle); }
+    .detail-value { color: var(--cream); text-align: right; }
 
     .empty {
       text-align: center;
@@ -163,6 +250,7 @@
       align-items: center;
       gap: 0.5rem;
       margin-bottom: 1.25rem;
+      flex-wrap: wrap;
     }
 
     .sort-btn {
@@ -181,47 +269,97 @@
       border-color: var(--gold);
       color: var(--gold);
     }
+
+    @media (max-width: 640px) {
+      .layout { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(74, 111, 165, 0.25);
+      }
+      .sidebar-logo { display: none; }
+      .nav-item { margin-bottom: 0; flex: 1; text-align: center; }
+      .main { padding: 1.5rem 1.25rem; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="wrap">
-    <h1>Story archive</h1>
+  <div class="gate" id="gate">
+    <h1>StoryTrail Admin</h1>
+    <p style="color: var(--sky); font-size: 0.9rem;">Enter the admin password</p>
+    <input type="password" id="password-input" placeholder="Password" />
+    <button onclick="checkPassword()">Enter</button>
+    <p class="gate-error" id="gate-error">Incorrect password.</p>
+  </div>
 
-    <div class="gate" id="gate">
-      <p style="color: var(--sky); font-size: 0.9rem; margin-bottom: 0.5rem;">Enter the admin password</p>
-      <input type="password" id="password-input" placeholder="Password" />
-      <button onclick="checkPassword()">View stories</button>
-      <p class="gate-error" id="gate-error">Incorrect password.</p>
-    </div>
-
-    <div id="content">
-      <div class="sort-bar" id="sort-bar">
-        <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
-        <button class="sort-btn active" id="sort-newest" onclick="setSort('newest')">Newest first</button>
-        <button class="sort-btn" id="sort-oldest" onclick="setSort('oldest')">Oldest first</button>
+  <div id="app">
+    <div class="layout">
+      <div class="sidebar">
+        <div class="sidebar-logo">Admin</div>
+        <button class="nav-item active" id="nav-users" onclick="switchPanel('users')">Users</button>
+        <button class="nav-item" id="nav-stories" onclick="switchPanel('stories')">Stories</button>
       </div>
-      <div id="story-list"></div>
+
+      <div class="main">
+        <div class="panel active" id="panel-users">
+          <h1>Users</h1>
+          <div class="sort-bar">
+            <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
+            <button class="sort-btn active" id="users-sort-newest" onclick="setUsersSort('newest')">Newest first</button>
+            <button class="sort-btn" id="users-sort-oldest" onclick="setUsersSort('oldest')">Oldest first</button>
+          </div>
+          <div id="user-list"></div>
+        </div>
+
+        <div class="panel" id="panel-stories">
+          <h1>Stories</h1>
+          <div class="sort-bar">
+            <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
+            <button class="sort-btn active" id="stories-sort-newest" onclick="setStoriesSort('newest')">Newest first</button>
+            <button class="sort-btn" id="stories-sort-oldest" onclick="setStoriesSort('oldest')">Oldest first</button>
+          </div>
+          <div id="story-list"></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
     const EDGE_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/get-stories";
-    // Same publishable key used on the enrollment page -- safe to expose
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_THFfVECYJDIG_B6XPJkWig_jnIEcBS2";
 
+    let adminPassword = '';
+    let allUsers = [];
     let allStories = [];
-    let currentSort = 'newest';
+    let usersSort = 'newest';
+    let storiesSort = 'newest';
+    let storiesLoaded = false;
 
     async function checkPassword() {
       const password = document.getElementById('password-input').value;
       const errorEl = document.getElementById('gate-error');
       errorEl.style.display = 'none';
 
-      document.getElementById('story-list').innerHTML = '<div class="loading">Loading stories...</div>';
-      document.getElementById('gate').style.display = 'none';
-      document.getElementById('content').style.display = 'block';
+      const result = await fetchFromServer('users', password);
 
+      if (result === null) {
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      adminPassword = password;
+      allUsers = result.users || [];
+
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      renderUsers();
+    }
+
+    async function fetchFromServer(view, passwordOverride) {
       try {
         const response = await fetch(EDGE_FUNCTION_URL, {
           method: 'POST',
@@ -230,32 +368,103 @@
             'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
             'apikey': SUPABASE_PUBLISHABLE_KEY,
           },
-          body: JSON.stringify({ password }),
+          body: JSON.stringify({ password: passwordOverride || adminPassword, view }),
         });
 
-        const result = await response.json();
-
-        if (!response.ok) {
-          // Wrong password -- go back to the gate
-          document.getElementById('content').style.display = 'none';
-          document.getElementById('gate').style.display = 'block';
-          errorEl.style.display = 'block';
-          return;
-        }
-
-        allStories = result.stories || [];
-        renderStories();
-
+        if (!response.ok) return null;
+        return await response.json();
       } catch (err) {
-        document.getElementById('story-list').innerHTML = '<div class="empty">Something went wrong. Please try again.</div>';
+        return null;
       }
     }
 
-    function setSort(sort) {
-      currentSort = sort;
-      document.getElementById('sort-newest').classList.toggle('active', sort === 'newest');
-      document.getElementById('sort-oldest').classList.toggle('active', sort === 'oldest');
+    async function switchPanel(panel) {
+      document.getElementById('nav-users').classList.toggle('active', panel === 'users');
+      document.getElementById('nav-stories').classList.toggle('active', panel === 'stories');
+      document.getElementById('panel-users').classList.toggle('active', panel === 'users');
+      document.getElementById('panel-stories').classList.toggle('active', panel === 'stories');
+
+      if (panel === 'stories' && !storiesLoaded) {
+        document.getElementById('story-list').innerHTML = '<div class="loading">Loading stories...</div>';
+        const result = await fetchFromServer('stories');
+        if (result) {
+          allStories = result.stories || [];
+          storiesLoaded = true;
+          renderStories();
+        }
+      }
+    }
+
+    function setUsersSort(sort) {
+      usersSort = sort;
+      document.getElementById('users-sort-newest').classList.toggle('active', sort === 'newest');
+      document.getElementById('users-sort-oldest').classList.toggle('active', sort === 'oldest');
+      renderUsers();
+    }
+
+    function setStoriesSort(sort) {
+      storiesSort = sort;
+      document.getElementById('stories-sort-newest').classList.toggle('active', sort === 'newest');
+      document.getElementById('stories-sort-oldest').classList.toggle('active', sort === 'oldest');
       renderStories();
+    }
+
+    function daysSince(dateStr) {
+      const then = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now - then;
+      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      if (days < 1) return 'Today';
+      if (days === 1) return '1 day';
+      return `${days} days`;
+    }
+
+    function renderUsers() {
+      const listEl = document.getElementById('user-list');
+
+      if (!allUsers || allUsers.length === 0) {
+        listEl.innerHTML = '<div class="empty">No users yet.</div>';
+        return;
+      }
+
+      const sorted = [...allUsers].sort((a, b) => {
+        const diff = new Date(a.created_at) - new Date(b.created_at);
+        return usersSort === 'newest' ? -diff : diff;
+      });
+
+      listEl.innerHTML = sorted.map((user, i) => {
+        const parentName = `${user.parent_first_name || ''} ${user.parent_last_name || ''}`.trim() || 'Unnamed parent';
+        const statusBadge = user.active
+          ? '<span class="badge badge-active">Active</span>'
+          : '<span class="badge badge-inactive">Inactive</span>';
+        const themes = (user.theme_tags || []).join(', ') || 'None given';
+
+        return `
+          <div class="item-card" onclick="toggleItem('user-${i}')">
+            <div class="item-card-header">
+              <div>
+                <div class="item-card-title">${escapeHtml(parentName)}</div>
+                <div class="item-card-sub">${escapeHtml(user.parent_email)}</div>
+              </div>
+              <div class="item-card-meta">
+                ${statusBadge}<br/>
+                ${user.story_count} ${user.story_count === 1 ? 'story' : 'stories'}<br/>
+                Subscribed ${daysSince(user.created_at)}
+              </div>
+            </div>
+            <div class="item-full" id="user-${i}">
+              <div class="detail-row"><span class="detail-label">Child's name</span><span class="detail-value">${escapeHtml(user.child_name)}</span></div>
+              <div class="detail-row"><span class="detail-label">Age</span><span class="detail-value">${user.child_age}</span></div>
+              <div class="detail-row"><span class="detail-label">Favorite color</span><span class="detail-value">${escapeHtml(user.favorite_color || 'Not given')}</span></div>
+              <div class="detail-row"><span class="detail-label">Favorite animal</span><span class="detail-value">${escapeHtml(user.favorite_animal || 'Not given')}</span></div>
+              <div class="detail-row"><span class="detail-label">Things they love</span><span class="detail-value">${escapeHtml(themes)}</span></div>
+              <div class="detail-row"><span class="detail-label">Time zone</span><span class="detail-value">${escapeHtml(user.timezone)}</span></div>
+              <div class="detail-row"><span class="detail-label">Stories generated</span><span class="detail-value">${user.story_count}</span></div>
+              <div class="detail-row"><span class="detail-label">Subscribed since</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span></div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderStories() {
@@ -268,7 +477,7 @@
 
       const sorted = [...allStories].sort((a, b) => {
         const diff = new Date(a.created_at) - new Date(b.created_at);
-        return currentSort === 'newest' ? -diff : diff;
+        return storiesSort === 'newest' ? -diff : diff;
       });
 
       listEl.innerHTML = sorted.map((story, i) => {
@@ -287,22 +496,24 @@
           : story.child_name;
 
         return `
-          <div class="story-card" onclick="toggleStory(${i})">
-            <div class="story-card-header">
-              <div class="story-card-title">${escapeHtml(titleText)}</div>
-              <div class="story-card-meta">${date}</div>
+          <div class="item-card" onclick="toggleItem('story-${i}')">
+            <div class="item-card-header">
+              <div class="item-card-title">${escapeHtml(titleText)}</div>
+              <div class="item-card-meta">${date}</div>
             </div>
             <div style="margin-top: 0.4rem;">
               <span class="badge ${badgeClass}">${badgeLabel}</span>
             </div>
-            <div class="story-full" id="story-${i}">${escapeHtml(story.story_text)}</div>
+            <div class="item-full" id="story-${i}">
+              <div class="story-text">${escapeHtml(story.story_text)}</div>
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    function toggleStory(i) {
-      const el = document.getElementById(`story-${i}`);
+    function toggleItem(id) {
+      const el = document.getElementById(id);
       el.style.display = el.style.display === 'block' ? 'none' : 'block';
     }
 
@@ -312,7 +523,6 @@
       return div.innerHTML;
     }
 
-    // Allow pressing Enter to submit the password
     document.getElementById('password-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') checkPassword();
     });
