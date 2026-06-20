@@ -527,10 +527,10 @@
           <input type="text" class="search-input" id="users-search" placeholder="Search by name or email..." oninput="renderUsers()" />
           <div class="sort-bar">
             <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
-            <button class="sort-btn active" id="users-sort-newest" onclick="setUsersSort('newest')">Newest first</button>
-            <button class="sort-btn" id="users-sort-oldest" onclick="setUsersSort('oldest')">Oldest first</button>
+            <button class="sort-btn active" id="users-sort-created" onclick="setUsersSort('created')">Date Created ↓</button>
             <button class="sort-btn" id="users-sort-name" onclick="setUsersSort('name')">Name A–Z</button>
             <button class="sort-btn" id="users-sort-email" onclick="setUsersSort('email')">Email A–Z</button>
+            <button class="sort-btn" id="users-sort-nextsend" onclick="setUsersSort('nextsend')">Next Send ↑</button>
           </div>
           <table class="log-table">
             <thead>
@@ -539,6 +539,7 @@
                 <th>Email</th>
                 <th>Status</th>
                 <th>Stories</th>
+                <th>Date Created</th>
                 <th>Next send</th>
               </tr>
             </thead>
@@ -580,7 +581,7 @@
     let adminPassword = '';
     let allUsers = [];
     let allLogs = [];
-    let usersSort = 'newest';
+    let usersSort = 'created';
     let logsFilter = 'all';
     let dashPeriod = 'all';
     let logsLoaded = false;
@@ -637,7 +638,7 @@
       document.getElementById('panel-logs').classList.toggle('active', panel === 'logs');
 
       if (panel === 'users' && allUsers.length === 0) {
-        document.getElementById('user-list').innerHTML = '<tr><td colspan="5" class="loading">Loading users...</td></tr>';
+        document.getElementById('user-list').innerHTML = '<tr><td colspan="6" class="loading">Loading users...</td></tr>';
         const result = await fetchFromServer('users');
         if (result) {
           allUsers = result.users || [];
@@ -825,28 +826,32 @@
       }
     }
 
-    let usersSortDirection = 'asc'; // only meaningful for 'name' and 'email' sorts
+    let usersSortDirection = 'desc'; // 'created' defaults to newest-first (desc)
+
+    const usersSortDefaults = {
+      created: 'desc',
+      nextsend: 'asc',
+      name: 'asc',
+      email: 'asc',
+    };
 
     function setUsersSort(sort) {
-      // Clicking the same alphabetical sort twice reverses direction.
-      // Newest/Oldest already function as their own pair, so this only
-      // applies to 'name' and 'email'.
-      if ((sort === 'name' || sort === 'email') && usersSort === sort) {
+      if (usersSort === sort) {
         usersSortDirection = usersSortDirection === 'asc' ? 'desc' : 'asc';
-      } else if (sort === 'name' || sort === 'email') {
-        usersSortDirection = 'asc';
+      } else {
+        usersSortDirection = usersSortDefaults[sort];
       }
-
       usersSort = sort;
-      document.getElementById('users-sort-newest').classList.toggle('active', sort === 'newest');
-      document.getElementById('users-sort-oldest').classList.toggle('active', sort === 'oldest');
-      document.getElementById('users-sort-name').classList.toggle('active', sort === 'name');
-      document.getElementById('users-sort-email').classList.toggle('active', sort === 'email');
 
-      document.getElementById('users-sort-name').textContent =
-        (sort === 'name' && usersSortDirection === 'desc') ? 'Name Z–A' : 'Name A–Z';
-      document.getElementById('users-sort-email').textContent =
-        (sort === 'email' && usersSortDirection === 'desc') ? 'Email Z–A' : 'Email A–Z';
+      ['created', 'name', 'email', 'nextsend'].forEach(s => {
+        document.getElementById(`users-sort-${s}`).classList.toggle('active', sort === s);
+      });
+
+      const arrow = usersSortDirection === 'asc' ? '↑' : '↓';
+      document.getElementById('users-sort-created').textContent = `Date Created ${sort === 'created' ? arrow : '↓'}`;
+      document.getElementById('users-sort-name').textContent = `Name ${sort === 'name' && usersSortDirection === 'desc' ? 'Z–A' : 'A–Z'}`;
+      document.getElementById('users-sort-email').textContent = `Email ${sort === 'email' && usersSortDirection === 'desc' ? 'Z–A' : 'A–Z'}`;
+      document.getElementById('users-sort-nextsend').textContent = `Next Send ${sort === 'nextsend' ? arrow : '↑'}`;
 
       renderUsers();
     }
@@ -872,11 +877,23 @@
       }) + ' ET';
     }
 
+    function formatDateCreated(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr).toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      }) + ' ET';
+    }
+
     function renderUsers() {
       const listEl = document.getElementById('user-list');
 
       if (!allUsers || allUsers.length === 0) {
-        listEl.innerHTML = '<tr><td colspan="5" class="empty">No users yet.</td></tr>';
+        listEl.innerHTML = '<tr><td colspan="6" class="empty">No users yet.</td></tr>';
         return;
       }
 
@@ -896,7 +913,7 @@
         : withNames;
 
       if (filtered.length === 0) {
-        listEl.innerHTML = '<tr><td colspan="5" class="empty">No users match that search.</td></tr>';
+        listEl.innerHTML = '<tr><td colspan="6" class="empty">No users match that search.</td></tr>';
         return;
       }
 
@@ -909,8 +926,13 @@
           const cmp = (a.parent_email || '').localeCompare(b.parent_email || '');
           return usersSortDirection === 'desc' ? -cmp : cmp;
         }
+        if (usersSort === 'nextsend') {
+          const diff = new Date(a.next_send_at || 0) - new Date(b.next_send_at || 0);
+          return usersSortDirection === 'desc' ? -diff : diff;
+        }
+        // 'created'
         const diff = new Date(a.created_at) - new Date(b.created_at);
-        return usersSort === 'newest' ? -diff : diff;
+        return usersSortDirection === 'desc' ? -diff : diff;
       });
 
       listEl.innerHTML = sorted.map((user, i) => {
@@ -926,13 +948,14 @@
             <td class="log-email">${escapeHtml(user.parent_email)}</td>
             <td>${statusBadge}</td>
             <td>${user.story_count} ${user.story_count === 1 ? 'story' : 'stories'}</td>
+            <td class="log-date">${formatDateCreated(user.created_at)}</td>
             <td class="log-date">${formatNextSend(user.next_send_at)}</td>
           </tr>
         `;
 
         const detailRow = `
           <tr>
-            <td colspan="5" style="padding: 0;">
+            <td colspan="6" style="padding: 0;">
               <div class="item-full" id="user-${i}" style="margin: 0; padding: 0 0.9rem;">
                 <div class="detail-row"><span class="detail-label">Child's name</span><span class="detail-value">${escapeHtml(user.child_name)}</span></div>
                 <div class="detail-row"><span class="detail-label">Age</span><span class="detail-value">${user.child_age}</span></div>
