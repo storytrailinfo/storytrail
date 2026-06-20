@@ -268,16 +268,30 @@ async function processChild(child) {
     console.log(`[${child.child_name}] Email sent.`);
 
     console.log(`[${child.child_name}] Saving story...`);
-    await supabase.from("stories").insert({
-      child_id: child.id,
-      child_name: child.child_name,
-      story_text: story,
-      send_type: "nightly",
-    });
+    const { data: savedStory } = await supabase
+      .from("stories")
+      .insert({
+        child_id: child.id,
+        child_name: child.child_name,
+        story_text: story,
+        send_type: "nightly",
+      })
+      .select()
+      .single();
 
     console.log(`[${child.child_name}] Advancing schedule...`);
     await advanceSchedule(child.id);
     console.log(`[${child.child_name}] Schedule advanced -- next story tomorrow at 6pm their time.`);
+
+    // Log the successful send -- shows up in the admin panel's Email Logs tab
+    await supabase.from("email_logs").insert({
+      child_id: child.id,
+      child_name: child.child_name,
+      parent_email: child.parent_email,
+      send_type: "nightly",
+      status: "success",
+      story_id: savedStory ? savedStory.id : null,
+    });
 
     console.log(`--- ${child.child_name}: done ---`);
   } catch (err) {
@@ -286,6 +300,22 @@ async function processChild(child) {
     // and retry automatically, instead of silently skipping a night.
     console.error(`--- ${child.child_name}: FAILED ---`);
     console.error(err.message);
+
+    // Log the failure too, with the actual error message, so it's
+    // visible (and resendable) from the admin panel instead of only
+    // existing in a GitHub Actions log that disappears.
+    try {
+      await supabase.from("email_logs").insert({
+        child_id: child.id,
+        child_name: child.child_name,
+        parent_email: child.parent_email,
+        send_type: "nightly",
+        status: "failed",
+        error_message: err.message,
+      });
+    } catch (logErr) {
+      console.error(`[${child.child_name}] Failed to write error log:`, logErr.message);
+    }
   }
 }
 

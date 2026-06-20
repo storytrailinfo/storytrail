@@ -271,6 +271,35 @@
       color: var(--gold);
     }
 
+    .resend-btn {
+      background: rgba(240, 192, 96, 0.1);
+      border: 1px solid rgba(240, 192, 96, 0.4);
+      color: var(--gold);
+      font-size: 0.78rem;
+      font-family: 'Inter', sans-serif;
+      padding: 0.25rem 0.75rem;
+      border-radius: 100px;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .resend-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .error-block {
+      margin-top: 0.6rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(226, 75, 74, 0.08);
+      border: 1px solid rgba(226, 75, 74, 0.25);
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: #F09595;
+      font-family: monospace;
+      word-break: break-word;
+    }
+
     @media (max-width: 640px) {
       .layout { flex-direction: column; }
       .sidebar {
@@ -303,6 +332,7 @@
         <div class="sidebar-logo">Admin</div>
         <button class="nav-item active" id="nav-users" onclick="switchPanel('users')">Users</button>
         <button class="nav-item" id="nav-stories" onclick="switchPanel('stories')">Stories</button>
+        <button class="nav-item" id="nav-logs" onclick="switchPanel('logs')">Email Logs</button>
       </div>
 
       <div class="main">
@@ -325,20 +355,34 @@
           </div>
           <div id="story-list"></div>
         </div>
+
+        <div class="panel" id="panel-logs">
+          <h1>Email Logs</h1>
+          <div class="sort-bar">
+            <span style="color: var(--periwinkle); font-size: 0.85rem;">Filter:</span>
+            <button class="sort-btn active" id="logs-filter-all" onclick="setLogsFilter('all')">All</button>
+            <button class="sort-btn" id="logs-filter-failed" onclick="setLogsFilter('failed')">Failed only</button>
+          </div>
+          <div id="log-list"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
     const EDGE_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/get-stories";
+    const RESEND_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/resend-email";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_THFfVECYJDIG_B6XPJkWig_jnIEcBS2";
 
     let adminPassword = '';
     let allUsers = [];
     let allStories = [];
+    let allLogs = [];
     let usersSort = 'newest';
     let storiesSort = 'newest';
+    let logsFilter = 'all';
     let storiesLoaded = false;
+    let logsLoaded = false;
 
     async function checkPassword() {
       const password = document.getElementById('password-input').value;
@@ -382,8 +426,10 @@
     async function switchPanel(panel) {
       document.getElementById('nav-users').classList.toggle('active', panel === 'users');
       document.getElementById('nav-stories').classList.toggle('active', panel === 'stories');
+      document.getElementById('nav-logs').classList.toggle('active', panel === 'logs');
       document.getElementById('panel-users').classList.toggle('active', panel === 'users');
       document.getElementById('panel-stories').classList.toggle('active', panel === 'stories');
+      document.getElementById('panel-logs').classList.toggle('active', panel === 'logs');
 
       if (panel === 'stories' && !storiesLoaded) {
         document.getElementById('story-list').innerHTML = '<div class="loading">Loading stories...</div>';
@@ -393,6 +439,115 @@
           storiesLoaded = true;
           renderStories();
         }
+      }
+
+      if (panel === 'logs' && !logsLoaded) {
+        document.getElementById('log-list').innerHTML = '<div class="loading">Loading email logs...</div>';
+        const result = await fetchFromServer('logs');
+        if (result) {
+          allLogs = result.logs || [];
+          logsLoaded = true;
+          renderLogs();
+        }
+      }
+    }
+
+    function setLogsFilter(filter) {
+      logsFilter = filter;
+      document.getElementById('logs-filter-all').classList.toggle('active', filter === 'all');
+      document.getElementById('logs-filter-failed').classList.toggle('active', filter === 'failed');
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const listEl = document.getElementById('log-list');
+
+      let filtered = allLogs;
+      if (logsFilter === 'failed') {
+        filtered = allLogs.filter(l => l.status === 'failed');
+      }
+
+      if (!filtered || filtered.length === 0) {
+        listEl.innerHTML = `<div class="empty">${logsFilter === 'failed' ? 'No failed sends. ' : 'No email logs yet.'}</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map((log) => {
+        const date = new Date(log.created_at).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit'
+        });
+        const statusBadge = log.status === 'success'
+          ? '<span class="badge badge-active">Sent</span>'
+          : '<span class="badge badge-inactive">Failed</span>';
+        const typeBadge = log.send_type === 'welcome'
+          ? '<span class="badge badge-welcome">Welcome</span>'
+          : '<span class="badge badge-nightly">Nightly</span>';
+
+        const resendBtn = log.child_id
+          ? `<button class="resend-btn" onclick="resendEmail('${log.id}', '${log.child_id}')" id="resend-btn-${log.id}">Resend</button>`
+          : '';
+
+        const errorBlock = log.status === 'failed' && log.error_message
+          ? `<div class="error-block">${escapeHtml(log.error_message)}</div>`
+          : '';
+
+        return `
+          <div class="item-card" style="cursor: default;">
+            <div class="item-card-header">
+              <div>
+                <div class="item-card-title">${escapeHtml(log.child_name)}</div>
+                <div class="item-card-sub">${escapeHtml(log.parent_email)}</div>
+              </div>
+              <div class="item-card-meta">${date}</div>
+            </div>
+            <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              ${statusBadge}${typeBadge}${resendBtn}
+            </div>
+            ${errorBlock}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function resendEmail(logId, childId) {
+      const btn = document.getElementById(`resend-btn-${logId}`);
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(RESEND_FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ password: adminPassword, child_id: childId }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          btn.textContent = 'Failed';
+          alert(result.error || 'Resend failed. Check the logs tab in a moment for details.');
+          setTimeout(() => { btn.disabled = false; btn.textContent = 'Resend'; }, 2000);
+          return;
+        }
+
+        btn.textContent = 'Sent!';
+        // Refresh logs after a short pause so the new log entry is visible
+        setTimeout(async () => {
+          const refreshed = await fetchFromServer('logs');
+          if (refreshed) {
+            allLogs = refreshed.logs || [];
+            renderLogs();
+          }
+        }, 1500);
+
+      } catch (err) {
+        btn.textContent = 'Failed';
+        alert('Something went wrong. Please try again.');
+        setTimeout(() => { btn.disabled = false; btn.textContent = 'Resend'; }, 2000);
       }
     }
 
