@@ -1,13 +1,21 @@
 name: StoryTrail Nightly Pipeline
 
-# Runs every hour, on the hour, forever -- checks for any child whose
-# story is due right now and sends it. Most hours it finds nobody due
-# and does nothing; that's expected, not a bug.
+# Runs every hour, checking for any child whose story is due right now
+# and sending it. Most hours it finds nobody due and does nothing;
+# that's expected, not a bug.
+#
+# NOTE: GitHub's own "schedule" trigger has proven unreliable for this
+# repo (a known, documented GitHub Actions platform issue) -- it fires
+# inconsistently, sometimes going hours without triggering. The PRIMARY
+# trigger is now repository_dispatch, called every hour by an external
+# scheduler (cron-job.org), which is far more reliable. "schedule" is
+# kept as a backup in case it happens to fire too -- redundancy, not
+# the primary mechanism.
 on:
+  repository_dispatch:
+    types: [hourly-trigger]
   schedule:
-    - cron: "0 0-23 * * *"
-  # Lets you manually trigger a run from the GitHub Actions tab too,
-  # useful for testing without waiting for the next hour.
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 jobs:
