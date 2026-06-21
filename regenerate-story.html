@@ -204,7 +204,7 @@
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
 
     const params = new URLSearchParams(window.location.search);
-    const childId = params.get('id');
+    const storyId = params.get('id');
 
     async function callFunction(payload) {
       const response = await fetch(EDGE_FUNCTION_URL, {
@@ -221,12 +221,12 @@
     }
 
     async function loadCheck() {
-      if (!childId) {
+      if (!storyId) {
         showError("This link is missing some information. Please use the link from your email.");
         return;
       }
 
-      const { ok, result } = await callFunction({ action: 'check', child_id: childId });
+      const { ok, result } = await callFunction({ action: 'check', story_id: storyId });
 
       if (!ok) {
         showError(result.error);
@@ -240,8 +240,9 @@
         return;
       }
 
+      const storyDescriptor = result.isToday ? "tonight's story" : "a new story";
       document.getElementById('confirm-text').textContent =
-        `We'll write a brand-new story for ${result.child_name} and email it right away.`;
+        `We'll write ${storyDescriptor} for ${result.child_name} and email it right away.`;
       document.getElementById('remaining-note').textContent =
         `${result.remaining} regeneration${result.remaining === 1 ? '' : 's'} left today.`;
       document.getElementById('confirm-view').style.display = 'block';
@@ -252,7 +253,7 @@
       btn.disabled = true;
       btn.textContent = 'Writing a new story...';
 
-      const { ok, result } = await callFunction({ action: 'regenerate', child_id: childId });
+      const { ok, result } = await callFunction({ action: 'regenerate', story_id: storyId });
 
       if (!ok) {
         if (result.limitReached) {
