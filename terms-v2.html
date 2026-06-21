@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms & Contact – StoryTrail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --midnight: #080C24;
+      --deep-navy: #0C1540;
+      --periwinkle: #4A6FA5;
+      --sky: #7BA7D4;
+      --moon-glow: #C8D8F0;
+      --cream: #EEF2FF;
+      --gold: #F0C060;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--midnight);
+      color: var(--cream);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon-container {
+      position: fixed;
+      top: -40px;
+      right: 6%;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #EEF4FF 0%, #C8D8F0 35%, #9DB8E0 65%, #6A8FC0 100%);
+      box-shadow:
+        0 0 60px 20px rgba(200, 216, 240, 0.25),
+        0 0 120px 50px rgba(200, 216, 240, 0.12),
+        inset -30px -20px 60px rgba(60, 80, 140, 0.4);
+      animation: moonFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(2deg); }
+      50% { transform: translateY(-18px) rotate(-1deg); }
+    }
+
+    .top-bar {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.3rem;
+    }
+
+    .top-bar a {
+      color: var(--cream);
+      text-decoration: none;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 2.2rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    .updated {
+      font-size: 0.82rem;
+      color: var(--periwinkle);
+      margin-bottom: 1.75rem;
+    }
+
+    .contact-card {
+      background: var(--deep-navy);
+      border: 1px solid rgba(240, 192, 96, 0.35);
+      border-radius: 18px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    .contact-card p {
+      font-size: 0.9rem;
+      color: var(--sky);
+      margin-bottom: 0.5rem;
+      font-weight: 300;
+    }
+
+    .contact-email {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.3rem;
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .contact-email:hover { color: var(--gold-light); }
+
+    h2 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    p, li {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--moon-glow);
+      font-weight: 300;
+      margin-bottom: 0.9rem;
+    }
+
+    ul { padding-left: 1.4rem; margin-bottom: 0.9rem; }
+
+    a { color: var(--sky); }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 3rem;
+      color: var(--periwinkle);
+      text-decoration: none;
+      font-size: 0.82rem;
+    }
+
+    .back-link:hover { color: var(--cream); }
+  </style>
+</head>
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+  <div class="moon-container"><div class="moon"></div></div>
+
+  <div class="top-bar"><a href="index-v2.html">StoryTrail</a></div>
+
+  <div class="wrap">
+    <h1>Terms & Contact</h1>
+    <p class="updated">Last updated: June 2026</p>
+
+    <div class="contact-card">
+      <p>Questions, issues, or just want to say hi?</p>
+      <a href="mailto:storytrailinfo@gmail.com" class="contact-email">storytrailinfo@gmail.com</a>
+    </div>
+
+    <h2>Agreement to terms</h2>
+    <p>By signing up for StoryTrail, you agree to these terms. If you don't agree, please don't use the service.</p>
+
+    <h2>The service</h2>
+    <p>StoryTrail generates and delivers personalized bedtime stories by email, based on the child profile information you provide. Stories are created using AI and are intended for entertainment and bedtime use. While we make every effort to keep content gentle, age-appropriate, and consistent with the guidelines we set, you're responsible for reviewing story content before sharing it with your child if you have any concerns.</p>
+
+    <h2>Subscriptions and billing</h2>
+    <p>StoryTrail offers a free trial period covering your first few stories. After the trial, your payment method will be charged automatically on a recurring monthly basis at the rate shown at signup, until you cancel. You can cancel anytime through your account management page, effective at the end of your current billing period. We do not offer refunds for partial billing periods, except where required by law.</p>
+
+    <h2>Your account</h2>
+    <p>You're responsible for keeping your account information accurate and up to date, and for any activity that occurs through your account. You agree to provide accurate information about yourself and your child for the purpose of personalizing stories.</p>
+
+    <h2>Acceptable use</h2>
+    <p>You agree not to use StoryTrail for any unlawful purpose, to attempt to disrupt or interfere with the service, or to misuse the platform in any way that could harm us or other users.</p>
+
+    <h2>Intellectual property</h2>
+    <p>Stories generated for your account are yours to read, save, and share personally. The StoryTrail name, branding, and underlying technology remain our property.</p>
+
+    <h2>Limitation of liability</h2>
+    <p>StoryTrail is provided "as is." We do our best to ensure reliable delivery and appropriate content, but we don't guarantee uninterrupted service or that every story will be free of errors. To the fullest extent permitted by law, StoryTrail is not liable for indirect or incidental damages arising from your use of the service.</p>
+
+    <h2>Changes to these terms</h2>
+    <p>We may update these terms from time to time. If we make material changes, we'll notify you by email or through a notice on our site. Continued use of StoryTrail after changes take effect means you accept the updated terms.</p>
+
+    <h2>Contact</h2>
+    <p>For any questions about these terms, billing, or anything else, reach us anytime at <a href="mailto:storytrailinfo@gmail.com">storytrailinfo@gmail.com</a>.</p>
+
+    <a href="index-v2.html" class="back-link">&larr; Back to StoryTrail</a>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.4 + 0.2,
+          alpha: Math.random(),
+          speed: Math.random() * 0.008 + 0.002,
+          dir: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed * s.dir;
+        if (s.alpha > 1 || s.alpha < 0.1) s.dir *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 216, 240, ${s.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    drawStars();
+  </script>
+</body>
+</html>

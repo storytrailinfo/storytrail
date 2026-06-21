@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About – StoryTrail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --midnight: #080C24;
+      --deep-navy: #0C1540;
+      --periwinkle: #4A6FA5;
+      --sky: #7BA7D4;
+      --moon-glow: #C8D8F0;
+      --cream: #EEF2FF;
+      --gold: #F0C060;
+      --gold-light: #FDE68A;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--midnight);
+      color: var(--cream);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon-container {
+      position: fixed;
+      top: -40px;
+      right: 6%;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #EEF4FF 0%, #C8D8F0 35%, #9DB8E0 65%, #6A8FC0 100%);
+      box-shadow:
+        0 0 60px 20px rgba(200, 216, 240, 0.25),
+        0 0 120px 50px rgba(200, 216, 240, 0.12),
+        inset -30px -20px 60px rgba(60, 80, 140, 0.4);
+      animation: moonFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(2deg); }
+      50% { transform: translateY(-18px) rotate(-1deg); }
+    }
+
+    .top-bar {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.3rem;
+    }
+
+    .top-bar a {
+      color: var(--cream);
+      text-decoration: none;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 2.2rem;
+      font-weight: 400;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .photo-placeholder {
+      width: 100%;
+      max-width: 360px;
+      aspect-ratio: 4/3;
+      margin: 0 auto 2.5rem;
+      border-radius: 20px;
+      border: 1px dashed rgba(74, 111, 165, 0.4);
+      background: rgba(74, 111, 165, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--periwinkle);
+      font-size: 0.85rem;
+      padding: 1rem;
+    }
+
+    .story-text {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.15rem;
+      line-height: 1.85;
+      color: var(--moon-glow);
+      font-weight: 300;
+    }
+
+    .story-text p { margin-bottom: 1.25rem; }
+    .story-text p:last-child { margin-bottom: 0; }
+
+    .signoff {
+      margin-top: 2.5rem;
+      font-family: 'Crimson Pro', serif;
+      font-style: italic;
+      color: var(--sky);
+      text-align: center;
+      font-size: 1.05rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 3rem;
+      color: var(--periwinkle);
+      text-decoration: none;
+      font-size: 0.82rem;
+    }
+
+    .back-link:hover { color: var(--cream); }
+
+    .back-wrap { text-align: center; }
+  </style>
+</head>
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+  <div class="moon-container"><div class="moon"></div></div>
+
+  <div class="top-bar"><a href="index-v2.html">StoryTrail</a></div>
+
+  <div class="wrap">
+    <h1>Why I built this</h1>
+
+    <div class="photo-placeholder">
+      [Photo of you and your girls goes here]
+    </div>
+
+    <div class="story-text">
+      <p>Hi, I'm Kevin — dad to two girls who, like most kids, want a brand-new bedtime story every single night. Forever. No repeats. No "we already did that one."</p>
+      <p>For a long time, I was the one making them up — standing at the foot of the bed, trying to invent a fresh adventure on the spot, every night, after a full day of work. Some nights I had it. Most nights, by night four or five, I was just recycling the same dragon with a different name, hoping nobody noticed.</p>
+      <p>So I built StoryTrail — partly for my own sanity, and partly because I figured I couldn't be the only parent running out of ideas at 7:45pm. Every night, it writes a brand-new story, personalized to your kid — their name, their favorite animal, whatever they're obsessed with that week — and it lands in your inbox before bedtime, ready to read.</p>
+      <p>It's still small, still growing, and still genuinely just me and a handful of founding families figuring it out together. But every story is one I'd actually be happy reading to my own girls — gentle, calm, and made just for them.</p>
+      <p>Thanks for being here, and thanks for letting StoryTrail be part of your kid's bedtime too.</p>
+    </div>
+
+    <p class="signoff">— Kevin, founder of StoryTrail</p>
+
+    <div class="back-wrap">
+      <a href="index-v2.html" class="back-link">&larr; Back to StoryTrail</a>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.4 + 0.2,
+          alpha: Math.random(),
+          speed: Math.random() * 0.008 + 0.002,
+          dir: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed * s.dir;
+        if (s.alpha > 1 || s.alpha < 0.1) s.dir *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 216, 240, ${s.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    drawStars();
+  </script>
+</body>
+</html>
