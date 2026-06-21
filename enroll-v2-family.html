@@ -416,7 +416,7 @@
         <div class="child-card" id="child-card-${uniqueId}" data-child-id="${uniqueId}">
           <div class="child-card-header">
             <div class="child-card-title">Child ${displayNumber}</div>
-            <button type="button" class="remove-child-btn" id="remove-btn-${uniqueId}" onclick="removeChild(${uniqueId})">Remove</button>
+            <button type="button" class="remove-child-btn" id="remove-btn-${uniqueId}" onclick="removeChildCard(${uniqueId})">Remove</button>
           </div>
           <div class="form-group">
             <label>Child's name</label>
@@ -454,22 +454,12 @@
       renumberAndUpdateUI();
     }
 
-    function removeChild(uniqueId) {
-      console.log('removeChild called with uniqueId:', uniqueId, 'childCount:', childCount);
-      if (childCount <= MIN_CHILDREN) {
-        console.log('Blocked: at minimum children, not removing.');
-        return;
-      }
+    function removeChildCard(uniqueId) {
+      if (childCount <= MIN_CHILDREN) return; // never remove below the minimum
       childCount--;
       setTimeout(() => {
         const card = document.getElementById(`child-card-${uniqueId}`);
-        console.log('Looking for child-card-' + uniqueId, '-> found:', card);
-        if (card) {
-          card.remove();
-          console.log('Card removed successfully.');
-        } else {
-          console.log('Card was null -- nothing to remove.');
-        }
+        if (card) card.remove();
         renumberAndUpdateUI();
       }, 0);
     }
