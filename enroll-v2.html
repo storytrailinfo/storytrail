@@ -450,8 +450,7 @@
           return;
         }
 
-        document.getElementById('form-view').style.display = 'none';
-        document.getElementById('success-view').style.display = 'block';
+        window.location.href = 'thank-you-v2.html';
 
       } catch (err) {
         errorEl.textContent = 'Something went wrong. Please try again.';
