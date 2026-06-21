@@ -407,8 +407,6 @@
 
     async function saveChild(i) {
       const child = childrenData[i];
-      console.log('Saving child at index', i, '-> child.id:', child.id, 'child.child_name:', child.child_name);
-
       const btn = document.getElementById(`save-btn-${i}`);
       const confirmEl = document.getElementById(`save-confirm-${i}`);
       confirmEl.style.display = 'none';
@@ -420,8 +418,6 @@
       const color = document.getElementById(`color-${i}`).value;
       const animal = document.getElementById(`animal-${i}`).value;
 
-      console.log('Sending payload:', { child_id: child.id, age, color, animal, things });
-
       const { ok, result } = await callFunction({
         action: 'update',
         parent_id: parentId,
@@ -431,8 +427,6 @@
         favorite_animal: animal,
         theme_tags: things ? things.split(',').map(t => t.trim()).filter(Boolean) : [],
       });
-
-      console.log('Response:', ok, result);
 
       btn.disabled = false;
       btn.textContent = 'Save changes';
