@@ -187,36 +187,28 @@
     }
 
     .child-card {
-      margin-bottom: 1rem;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.75rem;
+      border-bottom: 1px solid rgba(74, 111, 165, 0.2);
     }
 
-    .child-card:last-child { margin-bottom: 0; }
-
-    .child-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
+    .child-card:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
     }
 
     .child-card-name {
       font-family: 'Crimson Pro', serif;
-      font-size: 1.2rem;
-    }
-
-    .child-card-toggle {
-      font-size: 0.8rem;
-      color: var(--sky);
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
     }
 
     .child-form {
-      display: none;
-      margin-top: 1.25rem;
-      padding-top: 1.25rem;
-      border-top: 1px solid rgba(74, 111, 165, 0.2);
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
     }
-
-    .child-form.open { display: block; }
 
     .form-group { margin-bottom: 1rem; }
 
@@ -301,7 +293,14 @@
       <div class="card">
         <h1 id="parent-name-heading">Your account</h1>
         <p class="subtitle" id="parent-email-sub"></p>
+      </div>
 
+      <div class="card">
+        <div class="section-label">Your children</div>
+        <div id="children-list"></div>
+      </div>
+
+      <div class="card">
         <div class="section-label">Subscription</div>
         <div class="sub-status-row">
           <span class="sub-label">Plan</span>
@@ -314,11 +313,6 @@
 
         <button class="portal-btn" id="portal-btn" onclick="openPortal()">Manage subscription</button>
         <p class="portal-note">Update your card, view billing history, or cancel anytime — handled securely by Stripe.</p>
-      </div>
-
-      <div class="card">
-        <div class="section-label">Your children</div>
-        <div id="children-list"></div>
       </div>
 
     </div>
@@ -384,11 +378,8 @@
       const listEl = document.getElementById('children-list');
       listEl.innerHTML = childrenData.map((child, i) => `
         <div class="child-card">
-          <div class="child-card-header" onclick="toggleChild(${i})">
-            <span class="child-card-name">${escapeHtml(child.child_name)}</span>
-            <span class="child-card-toggle" id="toggle-${i}">Edit</span>
-          </div>
-          <div class="child-form" id="child-form-${i}">
+          <div class="child-card-name">${escapeHtml(child.child_name)}</div>
+          <div class="child-form open">
             <div class="form-group">
               <label>Age</label>
               <input type="number" id="age-${i}" min="1" max="17" value="${child.child_age}" />
@@ -412,14 +403,6 @@
           </div>
         </div>
       `).join('');
-    }
-
-    function toggleChild(i) {
-      const form = document.getElementById(`child-form-${i}`);
-      const toggle = document.getElementById(`toggle-${i}`);
-      const isOpen = form.classList.contains('open');
-      form.classList.toggle('open', !isOpen);
-      toggle.textContent = isOpen ? 'Edit' : 'Close';
     }
 
     async function saveChild(i) {
