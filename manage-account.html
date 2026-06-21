@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Account – StoryTrail</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --midnight: #080C24;
+      --deep-navy: #0C1540;
+      --periwinkle: #4A6FA5;
+      --sky: #7BA7D4;
+      --moon-glow: #C8D8F0;
+      --cream: #EEF2FF;
+      --gold: #F0C060;
+      --gold-light: #FDE68A;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--midnight);
+      color: var(--cream);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon-container {
+      position: fixed;
+      top: -40px;
+      right: 6%;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #EEF4FF 0%, #C8D8F0 35%, #9DB8E0 65%, #6A8FC0 100%);
+      box-shadow:
+        0 0 60px 20px rgba(200, 216, 240, 0.25),
+        0 0 120px 50px rgba(200, 216, 240, 0.12),
+        inset -30px -20px 60px rgba(60, 80, 140, 0.4);
+      animation: moonFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(2deg); }
+      50% { transform: translateY(-18px) rotate(-1deg); }
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 2;
+      padding: 1.5rem 5%;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.3rem;
+      color: var(--cream);
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 560px;
+      margin: 3rem auto 0;
+    }
+
+    .card {
+      background: var(--deep-navy);
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      border-radius: 28px;
+      padding: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--sky);
+      margin-bottom: 1.5rem;
+      font-weight: 300;
+    }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.9rem;
+    }
+
+    .sub-status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(74, 111, 165, 0.15);
+      font-size: 0.88rem;
+    }
+
+    .sub-status-row:last-of-type { border-bottom: none; }
+
+    .sub-label { color: var(--periwinkle); }
+    .sub-value { color: var(--cream); }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.65rem;
+      border-radius: 100px;
+    }
+
+    .badge-trialing {
+      background: rgba(240, 192, 96, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(240, 192, 96, 0.4);
+    }
+
+    .badge-active {
+      background: rgba(99, 153, 34, 0.15);
+      color: #97C459;
+      border: 1px solid rgba(99, 153, 34, 0.4);
+    }
+
+    .badge-canceled, .badge-past_due {
+      background: rgba(226, 75, 74, 0.12);
+      color: #F09595;
+      border: 1px solid rgba(226, 75, 74, 0.35);
+    }
+
+    .portal-btn {
+      width: 100%;
+      background: rgba(74, 111, 165, 0.15);
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      color: var(--sky);
+      padding: 0.8rem;
+      border-radius: 100px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 1.25rem;
+      transition: background 0.2s;
+    }
+
+    .portal-btn:hover:not(:disabled) {
+      background: rgba(74, 111, 165, 0.25);
+    }
+
+    .portal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .portal-note {
+      text-align: center;
+      font-size: 0.74rem;
+      color: var(--periwinkle);
+      margin-top: 0.7rem;
+      line-height: 1.5;
+    }
+
+    .child-card {
+      margin-bottom: 1rem;
+    }
+
+    .child-card:last-child { margin-bottom: 0; }
+
+    .child-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .child-card-name {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.2rem;
+    }
+
+    .child-card-toggle {
+      font-size: 0.8rem;
+      color: var(--sky);
+    }
+
+    .child-form {
+      display: none;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(74, 111, 165, 0.2);
+    }
+
+    .child-form.open { display: block; }
+
+    .form-group { margin-bottom: 1rem; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--sky);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      background: rgba(8, 12, 36, 0.6);
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--cream);
+      outline: none;
+    }
+
+    .form-group input:focus { border-color: rgba(200, 216, 240, 0.6); }
+
+    .save-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight);
+      border: none;
+      padding: 0.75rem;
+      border-radius: 100px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+
+    .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .save-confirm {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #97C459;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .loading-state, .error-state {
+      text-align: center;
+      color: var(--sky);
+      padding: 2rem 0;
+    }
+
+    .error-state { color: #F87171; }
+  </style>
+</head>
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+  <div class="moon-container"><div class="moon"></div></div>
+  <div class="top-bar">StoryTrail</div>
+
+  <div class="wrap">
+
+    <div id="loading-view" class="card">
+      <div class="loading-state">Loading your account...</div>
+    </div>
+
+    <div id="error-view" class="card" style="display:none;">
+      <div class="error-state" id="error-message">This link may be incorrect. Reply to any of our emails and we'll help sort it out.</div>
+    </div>
+
+    <div id="content-view" style="display:none;">
+
+      <div class="card">
+        <h1 id="parent-name-heading">Your account</h1>
+        <p class="subtitle" id="parent-email-sub"></p>
+
+        <div class="section-label">Subscription</div>
+        <div class="sub-status-row">
+          <span class="sub-label">Plan</span>
+          <span class="sub-value" id="sub-tier"></span>
+        </div>
+        <div class="sub-status-row">
+          <span class="sub-label">Status</span>
+          <span class="sub-value" id="sub-status"></span>
+        </div>
+
+        <button class="portal-btn" id="portal-btn" onclick="openPortal()">Manage subscription</button>
+        <p class="portal-note">Update your card, view billing history, or cancel anytime — handled securely by Stripe.</p>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Your children</div>
+        <div id="children-list"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const EDGE_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/manage-account";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
+
+    const params = new URLSearchParams(window.location.search);
+    const parentId = params.get('id');
+
+    let childrenData = [];
+
+    async function callFunction(payload) {
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      return { ok: response.ok, result };
+    }
+
+    function statusBadge(status) {
+      const labels = { trialing: 'Free trial', active: 'Active', past_due: 'Payment due', canceled: 'Canceled' };
+      const cls = `badge-${status}`;
+      return `<span class="badge ${cls}">${labels[status] || status}</span>`;
+    }
+
+    async function loadAccount() {
+      if (!parentId) {
+        showError("This link is missing some information. Please use the link from your email.");
+        return;
+      }
+
+      const { ok, result } = await callFunction({ action: 'get', parent_id: parentId });
+
+      if (!ok) {
+        showError(result.error);
+        return;
+      }
+
+      const parent = result.parent;
+      childrenData = result.children || [];
+
+      document.getElementById('parent-name-heading').textContent = `Hi ${parent.first_name}`;
+      document.getElementById('parent-email-sub').textContent = parent.email;
+      document.getElementById('sub-tier').textContent = parent.subscription_tier === 'family' ? 'Family ($19/mo)' : 'Single child ($9/mo)';
+      document.getElementById('sub-status').innerHTML = statusBadge(parent.subscription_status);
+
+      renderChildren();
+
+      document.getElementById('loading-view').style.display = 'none';
+      document.getElementById('content-view').style.display = 'block';
+    }
+
+    function renderChildren() {
+      const listEl = document.getElementById('children-list');
+      listEl.innerHTML = childrenData.map((child, i) => `
+        <div class="child-card">
+          <div class="child-card-header" onclick="toggleChild(${i})">
+            <span class="child-card-name">${escapeHtml(child.child_name)}</span>
+            <span class="child-card-toggle" id="toggle-${i}">Edit</span>
+          </div>
+          <div class="child-form" id="child-form-${i}">
+            <div class="form-group">
+              <label>Age</label>
+              <input type="number" id="age-${i}" min="1" max="17" value="${child.child_age}" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Favorite color</label>
+                <input type="text" id="color-${i}" value="${escapeHtml(child.favorite_color || '')}" />
+              </div>
+              <div class="form-group">
+                <label>Favorite animal</label>
+                <input type="text" id="animal-${i}" value="${escapeHtml(child.favorite_animal || '')}" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Things they love</label>
+              <input type="text" id="things-${i}" value="${escapeHtml((child.theme_tags || []).join(', '))}" />
+            </div>
+            <button class="save-btn" id="save-btn-${i}" onclick="saveChild(${i})">Save changes</button>
+            <p class="save-confirm" id="save-confirm-${i}">Saved!</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleChild(i) {
+      const form = document.getElementById(`child-form-${i}`);
+      const toggle = document.getElementById(`toggle-${i}`);
+      const isOpen = form.classList.contains('open');
+      form.classList.toggle('open', !isOpen);
+      toggle.textContent = isOpen ? 'Edit' : 'Close';
+    }
+
+    async function saveChild(i) {
+      const child = childrenData[i];
+      const btn = document.getElementById(`save-btn-${i}`);
+      const confirmEl = document.getElementById(`save-confirm-${i}`);
+      confirmEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      const age = parseInt(document.getElementById(`age-${i}`).value, 10);
+      const things = document.getElementById(`things-${i}`).value.trim();
+
+      const { ok, result } = await callFunction({
+        action: 'update',
+        parent_id: parentId,
+        child_id: child.id,
+        child_age: age,
+        favorite_color: document.getElementById(`color-${i}`).value,
+        favorite_animal: document.getElementById(`animal-${i}`).value,
+        theme_tags: things ? things.split(',').map(t => t.trim()).filter(Boolean) : [],
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Save changes';
+
+      if (!ok) {
+        alert(result.error || 'Something went wrong. Please try again.');
+        return;
+      }
+
+      confirmEl.style.display = 'block';
+      setTimeout(() => { confirmEl.style.display = 'none'; }, 2000);
+    }
+
+    async function openPortal() {
+      const btn = document.getElementById('portal-btn');
+      btn.disabled = true;
+      btn.textContent = 'Opening...';
+
+      const { ok, result } = await callFunction({ action: 'portal', parent_id: parentId });
+
+      if (!ok) {
+        alert(result.error || 'Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Manage subscription';
+        return;
+      }
+
+      window.location.href = result.url;
+    }
+
+    function showError(message) {
+      document.getElementById('loading-view').style.display = 'none';
+      document.getElementById('error-view').style.display = 'block';
+      if (message) document.getElementById('error-message').textContent = message;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.4 + 0.2,
+          alpha: Math.random(),
+          speed: Math.random() * 0.008 + 0.002,
+          dir: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed * s.dir;
+        if (s.alpha > 1 || s.alpha < 0.1) s.dir *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 216, 240, ${s.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    drawStars();
+
+    loadAccount();
+  </script>
+</body>
+</html>
