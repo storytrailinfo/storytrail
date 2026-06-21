@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Regenerate Story – StoryTrail</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --midnight: #080C24;
+      --deep-navy: #0C1540;
+      --periwinkle: #4A6FA5;
+      --sky: #7BA7D4;
+      --moon-glow: #C8D8F0;
+      --cream: #EEF2FF;
+      --gold: #F0C060;
+      --gold-light: #FDE68A;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--midnight);
+      color: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon-container {
+      position: fixed;
+      top: -40px;
+      right: 6%;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #EEF4FF 0%, #C8D8F0 35%, #9DB8E0 65%, #6A8FC0 100%);
+      box-shadow:
+        0 0 60px 20px rgba(200, 216, 240, 0.25),
+        0 0 120px 50px rgba(200, 216, 240, 0.12),
+        inset -30px -20px 60px rgba(60, 80, 140, 0.4);
+      animation: moonFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(2deg); }
+      50% { transform: translateY(-18px) rotate(-1deg); }
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 2;
+      padding: 1.5rem 5%;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.3rem;
+      color: var(--cream);
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--deep-navy);
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      border-radius: 28px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+    }
+
+    .moon-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+    h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 0.6rem;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--sky);
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+      font-weight: 300;
+    }
+
+    .remaining-note {
+      font-size: 0.8rem;
+      color: var(--periwinkle);
+      margin-bottom: 1.75rem;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight);
+      border: none;
+      padding: 0.9rem;
+      border-radius: 100px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(240, 192, 96, 0.3);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 36px rgba(240, 192, 96, 0.45);
+    }
+
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .loading-state, .error-state {
+      color: var(--sky);
+      padding: 1rem 0;
+    }
+
+    .error-state { color: #F87171; }
+
+    .success-state, .limit-state {
+      display: none;
+    }
+
+    .success-state h2, .limit-state h2 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .success-state p, .limit-state p {
+      font-size: 0.9rem;
+      color: var(--sky);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="stars-canvas"></canvas>
+  <div class="moon-container"><div class="moon"></div></div>
+  <div class="top-bar">StoryTrail</div>
+
+  <div class="card">
+
+    <div id="loading-view">
+      <div class="loading-state">Loading...</div>
+    </div>
+
+    <div id="error-view" style="display:none;">
+      <div class="moon-icon">🌙</div>
+      <h1>Hmm, we couldn't find that</h1>
+      <p class="error-state" id="error-message">This link may be incorrect or expired.</p>
+    </div>
+
+    <div id="confirm-view" style="display:none;">
+      <div class="moon-icon">🌙</div>
+      <h1>Want a different story?</h1>
+      <p class="subtitle" id="confirm-text"></p>
+      <p class="remaining-note" id="remaining-note"></p>
+      <button class="btn-primary" id="regenerate-btn" onclick="doRegenerate()">Send a new story</button>
+    </div>
+
+    <div class="success-state" id="success-view">
+      <div class="moon-icon">🌟</div>
+      <h2>On its way!</h2>
+      <p>Check your email — a brand-new story is headed your inbox now.</p>
+    </div>
+
+    <div class="limit-state" id="limit-view">
+      <div class="moon-icon">🌙</div>
+      <h2>That's all for tonight</h2>
+      <p id="limit-message">You've used today's regenerations. A fresh story will be ready tomorrow at the usual time.</p>
+    </div>
+
+  </div>
+
+  <script>
+    const EDGE_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/regenerate-story";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
+
+    const params = new URLSearchParams(window.location.search);
+    const childId = params.get('id');
+
+    async function callFunction(payload) {
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      return { ok: response.ok, result };
+    }
+
+    async function loadCheck() {
+      if (!childId) {
+        showError("This link is missing some information. Please use the link from your email.");
+        return;
+      }
+
+      const { ok, result } = await callFunction({ action: 'check', child_id: childId });
+
+      if (!ok) {
+        showError(result.error);
+        return;
+      }
+
+      document.getElementById('loading-view').style.display = 'none';
+
+      if (result.remaining <= 0) {
+        document.getElementById('limit-view').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('confirm-text').textContent =
+        `We'll write a brand-new story for ${result.child_name} and email it right away.`;
+      document.getElementById('remaining-note').textContent =
+        `${result.remaining} regeneration${result.remaining === 1 ? '' : 's'} left today.`;
+      document.getElementById('confirm-view').style.display = 'block';
+    }
+
+    async function doRegenerate() {
+      const btn = document.getElementById('regenerate-btn');
+      btn.disabled = true;
+      btn.textContent = 'Writing a new story...';
+
+      const { ok, result } = await callFunction({ action: 'regenerate', child_id: childId });
+
+      if (!ok) {
+        if (result.limitReached) {
+          document.getElementById('confirm-view').style.display = 'none';
+          document.getElementById('limit-message').textContent = result.error;
+          document.getElementById('limit-view').style.display = 'block';
+          return;
+        }
+        alert(result.error || 'Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Send a new story';
+        return;
+      }
+
+      document.getElementById('confirm-view').style.display = 'none';
+      document.getElementById('success-view').style.display = 'block';
+    }
+
+    function showError(message) {
+      document.getElementById('loading-view').style.display = 'none';
+      document.getElementById('error-view').style.display = 'block';
+      if (message) document.getElementById('error-message').textContent = message;
+    }
+
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.4 + 0.2,
+          alpha: Math.random(),
+          speed: Math.random() * 0.008 + 0.002,
+          dir: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed * s.dir;
+        if (s.alpha > 1 || s.alpha < 0.1) s.dir *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 216, 240, ${s.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    drawStars();
+
+    loadCheck();
+  </script>
+</body>
+</html>
