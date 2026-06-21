@@ -1,0 +1,39 @@
+name: StoryTrail v2 Nightly Pipeline (Sandbox)
+
+# Runs the v2 (sandbox) pipeline -- completely separate from v1's
+# production workflow. Triggered externally via cron-job.org calling a
+# DIFFERENT repository_dispatch event type ("v2-hourly-trigger") than
+# v1 uses ("hourly-trigger"), so the two never collide or interfere.
+on:
+  repository_dispatch:
+    types: [v2-hourly-trigger]
+  workflow_dispatch:
+
+jobs:
+  run-v2-pipeline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Node Code
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v5
+        with:
+          ref: v2-dev
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run the v2 pipeline
+        run: node storytrail_v2_run_pipeline.js
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.V2_ANTHROPIC_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.V2_RESEND_API_KEY }}
+          SUPABASE_URL: ${{ secrets.V2_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.V2_SUPABASE_SECRET_KEY }}
