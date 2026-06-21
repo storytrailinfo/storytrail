@@ -31,9 +31,58 @@
       align-items: center;
       justify-content: center;
       padding: 2rem 1rem;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon-container {
+      position: fixed;
+      top: -40px;
+      right: 6%;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #EEF4FF 0%, #C8D8F0 35%, #9DB8E0 65%, #6A8FC0 100%);
+      box-shadow:
+        0 0 60px 20px rgba(200, 216, 240, 0.25),
+        0 0 120px 50px rgba(200, 216, 240, 0.12),
+        inset -30px -20px 60px rgba(60, 80, 140, 0.4);
+      animation: moonFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(2deg); }
+      50% { transform: translateY(-18px) rotate(-1deg); }
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 2;
+      padding: 1.5rem 5%;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.3rem;
+      color: var(--cream);
     }
 
     .card {
+      position: relative;
+      z-index: 1;
       background: var(--deep-navy);
       border: 1px solid rgba(74, 111, 165, 0.4);
       border-radius: 28px;
@@ -150,6 +199,13 @@
       font-weight: 600;
       cursor: pointer;
       margin-top: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(240, 192, 96, 0.3);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 36px rgba(240, 192, 96, 0.45);
     }
 
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -160,6 +216,34 @@
       color: var(--periwinkle);
       margin-top: 0.85rem;
       line-height: 1.5;
+    }
+
+    .confidence-badges {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin: 1.75rem 0 0;
+    }
+
+    .confidence-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .confidence-badge svg {
+      width: 32px;
+      height: 32px;
+      color: var(--sky);
+      opacity: 0.9;
+    }
+
+    .confidence-badge span {
+      font-size: 0.72rem;
+      color: var(--periwinkle);
+      line-height: 1.3;
     }
 
     .success-state {
@@ -183,6 +267,12 @@
 </head>
 <body>
 
+  <canvas id="stars-canvas"></canvas>
+  <div class="moon-container">
+    <div class="moon"></div>
+  </div>
+  <div class="top-bar">StoryTrail</div>
+
   <div class="card">
     <div id="form-view">
       <h1>Join StoryTrail</h1>
@@ -196,16 +286,16 @@
         <div class="form-row">
           <div class="form-group">
             <label>First name</label>
-            <input type="text" id="parent-first-name" required />
+            <input type="text" id="parent-first-name" placeholder="Jamie" required />
           </div>
           <div class="form-group">
             <label>Last name</label>
-            <input type="text" id="parent-last-name" required />
+            <input type="text" id="parent-last-name" placeholder="Rivera" required />
           </div>
         </div>
         <div class="form-group">
           <label>Email address</label>
-          <input type="email" id="parent-email" required />
+          <input type="email" id="parent-email" placeholder="jamie@example.com" required />
         </div>
         <div class="form-group">
           <label>Time zone</label>
@@ -220,22 +310,22 @@
         <div class="section-label">Your child</div>
         <div class="form-group">
           <label>Child's name</label>
-          <input type="text" id="child-name" required />
+          <input type="text" id="child-name" placeholder="Sarah" required />
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Age</label>
-            <input type="number" id="child-age" min="1" max="17" required />
+            <input type="number" id="child-age" min="1" max="17" placeholder="6" required />
           </div>
           <div class="form-group">
             <label>Favorite color</label>
-            <input type="text" id="fav-color" />
+            <input type="text" id="fav-color" placeholder="sky blue" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Favorite animal</label>
-            <input type="text" id="fav-animal" />
+            <input type="text" id="fav-animal" placeholder="dragon" />
           </div>
           <div class="form-group">
             <label>Things they love</label>
@@ -252,6 +342,21 @@
 
         <button type="submit" class="btn-submit" id="submit-btn">Start free trial</button>
         <p class="fine-print">You won't be charged until your 7-day trial ends. Cancel anytime before then at no cost.</p>
+
+        <div class="confidence-badges">
+          <div class="confidence-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1l8 4v6c0 5.5-3.4 9.7-8 11-4.6-1.3-8-5.5-8-11V5l8-4z"/></svg>
+            <span>Stripe-secured checkout</span>
+          </div>
+          <div class="confidence-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            <span>256-bit encrypted</span>
+          </div>
+          <div class="confidence-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
+            <span>Cancel anytime</span>
+          </div>
+        </div>
       </form>
     </div>
 
@@ -263,8 +368,8 @@
 
   <script>
     const STRIPE_PUBLISHABLE_KEY = "pk_test_51TjwLbJ0fX1w58ayyaNCM6KiZQB0Yd87zdNACG3YC6cHARQt9Wljjh3Axr9XCfiq1XTVTiJPccns7wPWOvYs5qfI00fSErQgCd";
-    const CHECKOUT_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/create-checkout";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
+    const CHECKOUT_FUNCTION_URL = "SANDBOX_CREATE_CHECKOUT_FUNCTION_URL_HERE";
+    const SUPABASE_PUBLISHABLE_KEY = "SANDBOX_SUPABASE_PUBLISHABLE_KEY_HERE";
 
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
     const elements = stripe.elements();
@@ -355,6 +460,48 @@
         submitBtn.textContent = 'Start free trial';
       }
     });
+
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      const count = Math.floor((canvas.width * canvas.height) / 4000);
+      for (let i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.4 + 0.2,
+          alpha: Math.random(),
+          speed: Math.random() * 0.008 + 0.002,
+          dir: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+    }
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed * s.dir;
+        if (s.alpha > 1 || s.alpha < 0.1) s.dir *= -1;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 216, 240, ${s.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    window.addEventListener('resize', () => { resize(); initStars(); });
+    resize();
+    initStars();
+    drawStars();
   </script>
 </body>
 </html>
