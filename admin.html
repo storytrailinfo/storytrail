@@ -441,6 +441,16 @@
     /* ── DASHBOARD ── */
     #panel-dashboard { max-width: none; }
 
+    .dash-section-label {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--gold);
+      margin: 2.25rem 0 1.25rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(74, 111, 165, 0.2);
+    }
+
     .stat-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -520,6 +530,18 @@
           <div class="stat-grid" id="dash-stat-grid">
             <div class="loading">Loading dashboard...</div>
           </div>
+
+          <h2 class="dash-section-label">v2 (Sandbox)</h2>
+          <div class="sort-bar">
+            <span style="color: var(--periwinkle); font-size: 0.85rem;">Period:</span>
+            <button class="sort-btn" id="dash-v2-period-day" onclick="setDashV2Period('day')">Today</button>
+            <button class="sort-btn" id="dash-v2-period-week" onclick="setDashV2Period('week')">7 days</button>
+            <button class="sort-btn" id="dash-v2-period-month" onclick="setDashV2Period('month')">30 days</button>
+            <button class="sort-btn active" id="dash-v2-period-all" onclick="setDashV2Period('all')">All time</button>
+          </div>
+          <div class="stat-grid" id="dash-v2-stat-grid">
+            <div class="loading">Loading v2 dashboard...</div>
+          </div>
         </div>
 
         <div class="panel" id="panel-users">
@@ -578,6 +600,70 @@
     const UNSUBSCRIBE_FUNCTION_URL = "https://ogdczdslclzplunbklaa.supabase.co/functions/v1/unsubscribe-child";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_THFfVECYJDIG_B6XPJkWig_jnIEcBS2";
 
+    // v2 (sandbox) project -- entirely separate Supabase project, used
+    // only for the v2 dashboard stats section below.
+    const V2_DASHBOARD_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/admin-v2-dashboard";
+    const V2_SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
+
+    let dashV2Period = 'all';
+
+    async function fetchV2Dashboard(period) {
+      try {
+        const response = await fetch(V2_DASHBOARD_FUNCTION_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${V2_SUPABASE_PUBLISHABLE_KEY}`,
+            'apikey': V2_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ password: adminPassword, period }),
+        });
+        if (!response.ok) return null;
+        return await response.json();
+      } catch (err) {
+        return null;
+      }
+    }
+
+    async function setDashV2Period(period) {
+      dashV2Period = period;
+      ['day', 'week', 'month', 'all'].forEach(p => {
+        document.getElementById(`dash-v2-period-${p}`).classList.toggle('active', p === period);
+      });
+      document.getElementById('dash-v2-stat-grid').innerHTML = '<div class="loading">Loading v2 dashboard...</div>';
+      const result = await fetchV2Dashboard(period);
+      renderDashboardV2(result ? result.dashboard : null);
+    }
+
+    function renderDashboardV2(stats) {
+      const gridEl = document.getElementById('dash-v2-stat-grid');
+      if (!stats) {
+        gridEl.innerHTML = '<div class="empty">Couldn\'t load v2 dashboard stats.</div>';
+        return;
+      }
+
+      const rateDisplay = stats.conversionRate === null ? '—' : `${stats.conversionRate}%`;
+      const rateNote = stats.resolvedCount > 0
+        ? `${stats.convertedCount} of ${stats.resolvedCount} resolved trials`
+        : 'No resolved trials yet';
+
+      gridEl.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card-label">Active trials</div>
+          <div class="stat-card-value">${stats.activeTrials}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Active paid subscribers</div>
+          <div class="stat-card-value">${stats.activePaid}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Trial → paid conversion</div>
+          <div class="stat-card-value">${rateDisplay}</div>
+          <div style="font-size:0.72rem;color:var(--periwinkle);margin-top:0.3rem;">${rateNote}</div>
+        </div>
+      `;
+    }
+
     let adminPassword = '';
     let allUsers = [];
     let allLogs = [];
@@ -608,6 +694,10 @@
       document.getElementById('app').style.display = 'block';
 
       renderDashboard(dashResult.dashboard);
+
+      // Load v2 (sandbox) stats too, same password reused
+      const v2Result = await fetchV2Dashboard(dashV2Period);
+      renderDashboardV2(v2Result ? v2Result.dashboard : null);
     }
 
     async function fetchFromServer(view, passwordOverride, period) {
