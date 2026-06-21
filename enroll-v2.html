@@ -8,6 +8,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://js.stripe.com/v3/"></script>
+
+  <!-- Meta Pixel -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+
+    // Shared event id per page load -- used to deduplicate this
+    // event between the Pixel (client-side) and CAPI (server-side)
+    // call for the same conversion, so Meta counts it once, not twice.
+    window.storytrailEventId = 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+
+    fbq('init', '2216558948882284');
+    fbq('track', 'PageView');
+  </script>
+  <!-- End Meta Pixel -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -403,6 +424,10 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Processing...';
 
+      // Fire InitiateCheckout the moment they submit -- a real signal
+      // of intent, separate from the eventual StartTrial conversion.
+      fbq('track', 'InitiateCheckout', {}, { eventID: window.storytrailEventId + '_init' });
+
       const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
@@ -441,6 +466,10 @@
             favorite_animal: document.getElementById('fav-animal').value,
             theme_tags: thingsTheyLove ? thingsTheyLove.split(',').map(t => t.trim()).filter(Boolean) : [],
             timezone: document.getElementById('timezone').value,
+            // Sent to the backend so the server-side CAPI StartTrial
+            // call uses the SAME event id as this Pixel event below --
+            // that's what tells Meta these are one event, not two.
+            meta_event_id: window.storytrailEventId,
           }),
         });
 
@@ -453,6 +482,10 @@
           submitBtn.textContent = 'Get your first story now';
           return;
         }
+
+        // Fire StartTrial client-side, using the SAME event id sent to
+        // the backend above, so Meta deduplicates against the CAPI call.
+        fbq('track', 'StartTrial', { value: 9.00, currency: 'USD' }, { eventID: window.storytrailEventId });
 
         window.location.href = 'thank-you-v2.html';
 
