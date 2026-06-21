@@ -95,21 +95,20 @@
       text-align: center;
     }
 
-    .photo-placeholder {
+    .photo-frame {
       width: 100%;
-      max-width: 360px;
-      aspect-ratio: 4/3;
+      max-width: 300px;
       margin: 0 auto 2.5rem;
       border-radius: 20px;
-      border: 1px dashed rgba(74, 111, 165, 0.4);
-      background: rgba(74, 111, 165, 0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: var(--periwinkle);
-      font-size: 0.85rem;
-      padding: 1rem;
+      overflow: hidden;
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      box-shadow: 0 8px 36px rgba(0, 0, 0, 0.3);
+    }
+
+    .photo-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
     }
 
     .story-text {
@@ -155,8 +154,8 @@
   <div class="wrap">
     <h1>Why I built this</h1>
 
-    <div class="photo-placeholder">
-      [Photo of you and your girls goes here]
+    <div class="photo-frame">
+      <img src="family-photo.jpg" alt="Kevin with his two daughters" />
     </div>
 
     <div class="story-text">
