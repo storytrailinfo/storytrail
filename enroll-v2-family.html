@@ -263,6 +263,15 @@
           <label>Email address</label>
           <input type="email" id="parent-email" required />
         </div>
+        <div class="form-group">
+          <label>Time zone</label>
+          <select id="parent-timezone">
+            <option value="America/New_York">Eastern</option>
+            <option value="America/Chicago">Central</option>
+            <option value="America/Denver">Mountain</option>
+            <option value="America/Los_Angeles">Pacific</option>
+          </select>
+        </div>
 
         <div class="section-label">Your children</div>
         <div id="children-container"></div>
@@ -293,14 +302,16 @@
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
 
     const MAX_CHILDREN = 4;
+    const MIN_CHILDREN = 2;
     let childCount = 0;
+    let nextChildId = 0; // unique, never reused -- avoids index collisions after removal
 
-    function childCardHtml(index) {
+    function childCardHtml(uniqueId, displayNumber) {
       return `
-        <div class="child-card" id="child-card-${index}">
+        <div class="child-card" id="child-card-${uniqueId}" data-child-id="${uniqueId}">
           <div class="child-card-header">
-            <div class="child-card-title">Child ${index}</div>
-            ${index > 2 ? `<button type="button" class="remove-child-btn" onclick="removeChild(${index})">Remove</button>` : ''}
+            <div class="child-card-title">Child ${displayNumber}</div>
+            <button type="button" class="remove-child-btn" id="remove-btn-${uniqueId}" onclick="removeChild(${uniqueId})">Remove</button>
           </div>
           <div class="form-group">
             <label>Child's name</label>
@@ -312,28 +323,19 @@
               <input type="number" class="child-age" min="1" max="17" required />
             </div>
             <div class="form-group">
-              <label>Time zone</label>
-              <select class="child-timezone">
-                <option value="America/New_York">Eastern</option>
-                <option value="America/Chicago">Central</option>
-                <option value="America/Denver">Mountain</option>
-                <option value="America/Los_Angeles">Pacific</option>
-              </select>
+              <label>Favorite color</label>
+              <input type="text" class="child-color" />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Favorite color</label>
-              <input type="text" class="child-color" />
-            </div>
-            <div class="form-group">
               <label>Favorite animal</label>
               <input type="text" class="child-animal" />
             </div>
-          </div>
-          <div class="form-group">
-            <label>Things they love</label>
-            <input type="text" class="child-things" placeholder="dinosaurs, space, unicorns..." />
+            <div class="form-group">
+              <label>Things they love</label>
+              <input type="text" class="child-things" placeholder="dinosaurs, space..." />
+            </div>
           </div>
         </div>
       `;
@@ -341,26 +343,37 @@
 
     function addChild() {
       if (childCount >= MAX_CHILDREN) return;
+      nextChildId++;
       childCount++;
-      document.getElementById('children-container').insertAdjacentHTML('beforeend', childCardHtml(childCount));
-      updateChildUI();
+      document.getElementById('children-container').insertAdjacentHTML('beforeend', childCardHtml(nextChildId, childCount));
+      renumberAndUpdateUI();
     }
 
-    function removeChild(index) {
-      const card = document.getElementById(`child-card-${index}`);
+    function removeChild(uniqueId) {
+      if (childCount <= MIN_CHILDREN) return; // never remove below the minimum
+      const card = document.getElementById(`child-card-${uniqueId}`);
       if (card) card.remove();
       childCount--;
-      updateChildUI();
+      renumberAndUpdateUI();
     }
 
-    function updateChildUI() {
-      const note = document.getElementById('child-count-note');
-      const addBtn = document.getElementById('add-child-btn');
-      note.textContent = `${childCount} of ${MAX_CHILDREN} children added (minimum 2 required)`;
-      addBtn.disabled = childCount >= MAX_CHILDREN;
+    function renumberAndUpdateUI() {
+      // Update the visible "Child 1", "Child 2"... labels to reflect
+      // current order after any removal, and show/hide each card's
+      // remove button based on the LIVE count, not a fixed index.
+      const cards = document.querySelectorAll('.child-card');
+      cards.forEach((card, i) => {
+        card.querySelector('.child-card-title').textContent = `Child ${i + 1}`;
+        const removeBtn = card.querySelector('.remove-child-btn');
+        removeBtn.style.display = childCount > MIN_CHILDREN ? 'inline-block' : 'none';
+      });
+
+      document.getElementById('child-count-note').textContent =
+        `${childCount} of ${MAX_CHILDREN} children added (minimum ${MIN_CHILDREN} required)`;
+      document.getElementById('add-child-btn').disabled = childCount >= MAX_CHILDREN;
     }
 
-    // Start with 2 children, since the family plan requires a minimum of 2
+    // Start with the required minimum of 2 children
     addChild();
     addChild();
 
@@ -410,6 +423,7 @@
       }
 
       const childCards = document.querySelectorAll('.child-card');
+      const sharedTimezone = document.getElementById('parent-timezone').value;
       const childrenData = Array.from(childCards).map(card => {
         const things = card.querySelector('.child-things').value.trim();
         return {
@@ -418,7 +432,7 @@
           favorite_color: card.querySelector('.child-color').value,
           favorite_animal: card.querySelector('.child-animal').value,
           theme_tags: things ? things.split(',').map(t => t.trim()).filter(Boolean) : [],
-          timezone: card.querySelector('.child-timezone').value,
+          timezone: sharedTimezone,
         };
       });
 

@@ -207,6 +207,15 @@
           <label>Email address</label>
           <input type="email" id="parent-email" required />
         </div>
+        <div class="form-group">
+          <label>Time zone</label>
+          <select id="timezone">
+            <option value="America/New_York">Eastern</option>
+            <option value="America/Chicago">Central</option>
+            <option value="America/Denver">Mountain</option>
+            <option value="America/Los_Angeles">Pacific</option>
+          </select>
+        </div>
 
         <div class="section-label">Your child</div>
         <div class="form-group">
@@ -219,28 +228,19 @@
             <input type="number" id="child-age" min="1" max="17" required />
           </div>
           <div class="form-group">
-            <label>Time zone</label>
-            <select id="timezone">
-              <option value="America/New_York">Eastern</option>
-              <option value="America/Chicago">Central</option>
-              <option value="America/Denver">Mountain</option>
-              <option value="America/Los_Angeles">Pacific</option>
-            </select>
+            <label>Favorite color</label>
+            <input type="text" id="fav-color" />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Favorite color</label>
-            <input type="text" id="fav-color" />
-          </div>
-          <div class="form-group">
             <label>Favorite animal</label>
             <input type="text" id="fav-animal" />
           </div>
-        </div>
-        <div class="form-group">
-          <label>Things they love</label>
-          <input type="text" id="fav-things" placeholder="dinosaurs, space, unicorns..." />
+          <div class="form-group">
+            <label>Things they love</label>
+            <input type="text" id="fav-things" placeholder="dinosaurs, space..." />
+          </div>
         </div>
 
         <div class="section-label">Payment</div>
