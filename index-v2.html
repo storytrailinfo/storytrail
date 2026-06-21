@@ -627,6 +627,60 @@
       box-shadow: 0 8px 36px rgba(240, 192, 96, 0.45);
     }
 
+    /* ── FAQ ── */
+    .faq-list {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border-bottom: 1px solid rgba(74, 111, 165, 0.25);
+    }
+
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 0.25rem;
+      cursor: pointer;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.1rem;
+      color: var(--cream);
+    }
+
+    .faq-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid rgba(240, 192, 96, 0.4);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: transform 0.25s ease;
+    }
+
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      font-size: 0.95rem;
+      color: var(--sky);
+      line-height: 1.65;
+      font-weight: 300;
+      padding: 0 0.25rem;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 320px;
+      padding: 0 0.25rem 1.25rem;
+    }
+
     /* ── FOOTER ── */
     footer {
       position: relative;
@@ -1081,6 +1135,58 @@
   </div>
 </section>
 
+<!-- ── FAQ ── -->
+<section class="section" id="faq">
+  <p class="section-label">Questions</p>
+  <h2 class="section-title">Good to know</h2>
+  <div class="divider"></div>
+
+  <div class="faq-list">
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question"><span>How does this work?</span><span class="faq-icon">+</span></div>
+      <div class="faq-answer">You tell us your child's name, age, and a few things they love — their favorite color, animal, whatever they're into right now. Every night, we write a brand-new bedtime story starring them, built around those details, and email it straight to you before bedtime.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question"><span>Is the content safe for kids?</span><span class="faq-icon">+</span></div>
+      <div class="faq-answer">Yes. Every story is written specifically for bedtime — gentle, calm, age-appropriate, with no scary content, no violence, and nothing meant to overstimulate right before sleep.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question"><span>Can I update my child's favorites later?</span><span class="faq-icon">+</span></div>
+      <div class="faq-answer">Anytime. Kids' interests change fast — every email includes a link to update their favorite color, animal, or anything else in seconds. Tomorrow's story will reflect it.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question"><span>What if I don't like a story?</span><span class="faq-icon">+</span></div>
+      <div class="faq-answer">Every email has a "get a new one" link. You can regenerate a fresh story up to 3 times a day, no questions asked.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question"><span>What if I have more than one kid?</span><span class="faq-icon">+</span></div>
+      <div class="faq-answer">Our family plan covers up to 4 children for one flat $19/month — each child gets their own story, written just for them, every night.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question"><span>What if the email doesn't show up?</span><span class="faq-icon">+</span></div>
+      <div class="faq-answer">First, check your spam or promotions folder — we're a new sender, so some inboxes are extra cautious at first. Replying to one of our emails helps a lot. Still nothing? Just email us at storytrailinfo@gmail.com and we'll sort it out.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question"><span>How does the free trial work, and what happens after?</span><span class="faq-icon">+</span></div>
+      <div class="faq-answer">Your first 3 stories are completely free — no charge up front. After that, your card is billed automatically at $9/month (1 child) or $19/month (2-4 children), unless you cancel before then.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question"><span>Can I cancel anytime?</span><span class="faq-icon">+</span></div>
+      <div class="faq-answer">Yes, anytime, no phone calls or emails required. Every email includes a link to manage your account, where you can cancel in a couple clicks.</div>
+    </div>
+
+  </div>
+</section>
+
+
 <!-- ── FOOTER ── -->
 <footer>
   <div class="footer-logo">🌙 StoryTrail</div>
@@ -1159,6 +1265,13 @@
       previewEl.style.display = 'none';
       btnEl.textContent = 'Show less';
     }
+  }
+
+  function toggleFaq(item) {
+    const wasOpen = item.classList.contains('open');
+    // Close any other open FAQ item, so only one is expanded at a time
+    document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
   }
 
 </script>
