@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin v2 – StoryTrail</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --midnight: #080C24;
+      --deep-navy: #0C1540;
+      --periwinkle: #4A6FA5;
+      --sky: #7BA7D4;
+      --moon-glow: #C8D8F0;
+      --cream: #EEF2FF;
+      --gold: #F0C060;
+      --gold-light: #FDE68A;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--midnight);
+      color: var(--cream);
+      min-height: 100vh;
+    }
+
+    .gate {
+      max-width: 360px;
+      margin: 6rem auto;
+      background: var(--deep-navy);
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .gate h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.6rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+    }
+
+    .gate input {
+      width: 100%;
+      background: rgba(8, 12, 36, 0.6);
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      font-size: 0.95rem;
+      color: var(--cream);
+      margin: 1rem 0;
+      outline: none;
+    }
+
+    .gate button {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight);
+      border: none;
+      padding: 0.8rem;
+      border-radius: 100px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .gate-error {
+      color: #F87171;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    #app { display: none; padding: 2.5rem 5%; max-width: 900px; margin: 0 auto; }
+
+    h1.page-title {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.7rem;
+      font-weight: 400;
+      margin-bottom: 0.3rem;
+    }
+
+    .page-sub {
+      color: var(--periwinkle);
+      font-size: 0.85rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .sort-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    .sort-btn {
+      background: none;
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      color: var(--sky);
+      font-size: 0.8rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 100px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .sort-btn.active {
+      background: rgba(240, 192, 96, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: var(--deep-navy);
+      border: 1px solid rgba(74, 111, 165, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem 1.6rem;
+    }
+
+    .stat-card-label {
+      font-size: 0.78rem;
+      color: var(--periwinkle);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.6rem;
+    }
+
+    .stat-card-value {
+      font-family: 'Crimson Pro', serif;
+      font-size: 2.4rem;
+      color: var(--cream);
+    }
+
+    .stat-card-note {
+      font-size: 0.75rem;
+      color: var(--periwinkle);
+      margin-top: 0.4rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: var(--periwinkle);
+      padding: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="gate" id="gate">
+    <h1>StoryTrail Admin (v2)</h1>
+    <p style="color: var(--sky); font-size: 0.9rem;">Enter the admin password</p>
+    <input type="password" id="password-input" placeholder="Password" />
+    <button onclick="checkPassword()">Enter</button>
+    <p class="gate-error" id="gate-error">Incorrect password.</p>
+  </div>
+
+  <div id="app">
+    <h1 class="page-title">v2 Dashboard</h1>
+    <p class="page-sub">Sandbox environment</p>
+
+    <div class="sort-bar">
+      <span style="color: var(--periwinkle); font-size: 0.85rem;">Period:</span>
+      <button class="sort-btn" id="period-day" onclick="setPeriod('day')">Today</button>
+      <button class="sort-btn" id="period-week" onclick="setPeriod('week')">7 days</button>
+      <button class="sort-btn" id="period-month" onclick="setPeriod('month')">30 days</button>
+      <button class="sort-btn active" id="period-all" onclick="setPeriod('all')">All time</button>
+    </div>
+
+    <div class="stat-grid" id="stat-grid">
+      <div class="loading">Loading dashboard...</div>
+    </div>
+  </div>
+
+  <script>
+    const EDGE_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/admin-v2-dashboard";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
+
+    let adminPassword = '';
+    let currentPeriod = 'all';
+
+    async function callFunction(payload) {
+      const response = await fetch(EDGE_FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      return { ok: response.ok, result };
+    }
+
+    async function checkPassword() {
+      const password = document.getElementById('password-input').value;
+      const errorEl = document.getElementById('gate-error');
+      errorEl.style.display = 'none';
+
+      const { ok, result } = await callFunction({ password, period: currentPeriod });
+
+      if (!ok) {
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      adminPassword = password;
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      renderStats(result.dashboard);
+    }
+
+    async function setPeriod(period) {
+      currentPeriod = period;
+      ['day', 'week', 'month', 'all'].forEach(p => {
+        document.getElementById(`period-${p}`).classList.toggle('active', p === period);
+      });
+      document.getElementById('stat-grid').innerHTML = '<div class="loading">Loading dashboard...</div>';
+
+      const { ok, result } = await callFunction({ password: adminPassword, period });
+      if (ok) renderStats(result.dashboard);
+    }
+
+    function renderStats(stats) {
+      const grid = document.getElementById('stat-grid');
+      if (!stats) {
+        grid.innerHTML = '<div class="loading">Couldn\'t load dashboard stats.</div>';
+        return;
+      }
+
+      const rateDisplay = stats.conversionRate === null
+        ? '—'
+        : `${stats.conversionRate}%`;
+
+      const rateNote = stats.resolvedCount > 0
+        ? `${stats.convertedCount} of ${stats.resolvedCount} resolved trials`
+        : 'No resolved trials yet';
+
+      grid.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card-label">Active trials</div>
+          <div class="stat-card-value">${stats.activeTrials}</div>
+          <div class="stat-card-note">Currently mid-trial, not yet resolved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Active paid subscribers</div>
+          <div class="stat-card-value">${stats.activePaid}</div>
+          <div class="stat-card-note">Converted and currently billing</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Trial → paid conversion rate</div>
+          <div class="stat-card-value">${rateDisplay}</div>
+          <div class="stat-card-note">${rateNote}</div>
+        </div>
+      `;
+    }
+
+    document.getElementById('password-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkPassword();
+    });
+  </script>
+</body>
+</html>
