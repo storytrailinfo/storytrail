@@ -456,10 +456,19 @@
 
     function removeChild(uniqueId) {
       if (childCount <= MIN_CHILDREN) return; // never remove below the minimum
-      const card = document.getElementById(`child-card-${uniqueId}`);
-      if (card) card.remove();
       childCount--;
-      renumberAndUpdateUI();
+      // Defer the actual DOM removal until the current event finishes.
+      // Stripe injects its own DOM observers on the page (visible in
+      // dev tools as __privateStripeFrame, etc.) -- removing a node
+      // synchronously, mid-click, can collide with their cleanup and
+      // throw a removeChild error that isn't really about our code.
+      // A 0ms setTimeout pushes our removal to right after the current
+      // call stack clears, sidestepping that collision.
+      setTimeout(() => {
+        const card = document.getElementById(`child-card-${uniqueId}`);
+        if (card) card.remove();
+        renumberAndUpdateUI();
+      }, 0);
     }
 
     function renumberAndUpdateUI() {
