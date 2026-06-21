@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StoryTrail – Bedtime Adventures for Little Dreamers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --midnight: #080C24;
+      --deep-navy: #0C1540;
+      --indigo: #14214E;
+      --mid-blue: #1E3A72;
+      --periwinkle: #4A6FA5;
+      --sky: #7BA7D4;
+      --moon-glow: #C8D8F0;
+      --cream: #EEF2FF;
+      --gold: #F0C060;
+      --gold-light: #FDE68A;
+      --white: #FFFFFF;
+      --card-bg: rgba(14, 26, 70, 0.7);
+      --overlay: rgba(8, 12, 36, 0.85);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--midnight);
+      color: var(--cream);
+      overflow-x: hidden;
+    }
+
+    /* ── STARS CANVAS ── */
+    #stars-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 5%;
+      backdrop-filter: blur(12px);
+      background: rgba(8, 12, 36, 0.6);
+      border-bottom: 1px solid rgba(74, 111, 165, 0.2);
+    }
+
+    .logo {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--moon-glow);
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo-moon {
+      font-size: 1.4rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--sky);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--cream); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight) !important;
+      font-weight: 600 !important;
+      padding: 0.55rem 1.4rem;
+      border-radius: 100px;
+      transition: opacity 0.2s, transform 0.2s !important;
+    }
+
+    .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 7rem 5% 4rem;
+      overflow: hidden;
+    }
+
+    /* Moon */
+    .moon-container {
+      position: absolute;
+      top: -60px;
+      right: 8%;
+      width: 340px;
+      height: 340px;
+      pointer-events: none;
+    }
+
+    .moon {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #EEF4FF 0%, #C8D8F0 35%, #9DB8E0 65%, #6A8FC0 100%);
+      box-shadow:
+        0 0 60px 20px rgba(200, 216, 240, 0.25),
+        0 0 120px 50px rgba(200, 216, 240, 0.12),
+        inset -30px -20px 60px rgba(60, 80, 140, 0.4);
+      animation: moonFloat 8s ease-in-out infinite;
+    }
+
+    .moon::before {
+      content: '';
+      position: absolute;
+      top: 18%; left: 22%;
+      width: 55px; height: 55px;
+      border-radius: 50%;
+      background: rgba(150, 170, 210, 0.35);
+    }
+
+    .moon::after {
+      content: '';
+      position: absolute;
+      top: 45%; left: 55%;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(150, 170, 210, 0.25);
+    }
+
+    @keyframes moonFloat {
+      0%, 100% { transform: translateY(0px) rotate(2deg); }
+      50% { transform: translateY(-18px) rotate(-1deg); }
+    }
+
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 {
+      font-family: 'Crimson Pro', serif;
+      font-size: clamp(2.8rem, 6vw, 5.2rem);
+      font-weight: 300;
+      line-height: 1.1;
+      color: var(--cream);
+      max-width: 800px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--moon-glow);
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--sky);
+      max-width: 540px;
+      line-height: 1.7;
+      font-weight: 300;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-cta-btn {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight);
+      border: none;
+      padding: 1rem 2.4rem;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 30px rgba(240, 192, 96, 0.3);
+      letter-spacing: 0.01em;
+    }
+
+    .hero-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(240, 192, 96, 0.45);
+    }
+
+    .hero-note {
+      margin-top: 0.9rem;
+      font-size: 0.8rem;
+      color: var(--periwinkle);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--periwinkle);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      animation: fadeUpDown 2.5s ease-in-out infinite;
+    }
+
+    .scroll-hint svg { opacity: 0.6; }
+
+    @keyframes fadeUpDown {
+      0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+      50% { opacity: 1; transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ── HOW IT WORKS ── */
+    .section {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 5%;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-family: 'Crimson Pro', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300;
+      text-align: center;
+      color: var(--cream);
+      margin-bottom: 1rem;
+    }
+
+    .section-sub {
+      text-align: center;
+      color: var(--sky);
+      font-size: 1rem;
+      font-weight: 300;
+      max-width: 520px;
+      margin: 0 auto 3.5rem;
+      line-height: 1.7;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(74, 111, 165, 0.25);
+      border-radius: 20px;
+      padding: 2rem 1.75rem;
+      backdrop-filter: blur(10px);
+      transition: transform 0.25s, border-color 0.25s;
+    }
+
+    .step-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(200, 216, 240, 0.35);
+    }
+
+    .step-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .step-card h3 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--moon-glow);
+      margin-bottom: 0.6rem;
+    }
+
+    .step-card p {
+      font-size: 0.875rem;
+      color: var(--sky);
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    /* ── STORY PREVIEW ── */
+    .story-section {
+      background: linear-gradient(180deg, transparent, var(--deep-navy) 20%, var(--deep-navy) 80%, transparent);
+      padding: 6rem 5%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .story-preview-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .story-preview-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(74, 111, 165, 0.3);
+      border-radius: 24px;
+      padding: 2rem 2.25rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .story-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(240, 192, 96, 0.15);
+      border: 1px solid rgba(240, 192, 96, 0.35);
+      color: var(--gold);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 100px;
+      margin-bottom: 1rem;
+    }
+
+    .story-preview-card h3 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 0.85rem;
+      font-style: italic;
+    }
+
+    .story-text-preview,
+    .story-text-full {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1rem;
+      color: var(--moon-glow);
+      line-height: 1.8;
+      font-weight: 300;
+      white-space: pre-line;
+    }
+
+    .story-text-full {
+      display: none;
+      margin-top: 0.9rem;
+    }
+
+    .story-meta {
+      margin-bottom: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .story-chip {
+      background: rgba(74, 111, 165, 0.2);
+      border: 1px solid rgba(74, 111, 165, 0.3);
+      border-radius: 100px;
+      padding: 0.25rem 0.8rem;
+      font-size: 0.75rem;
+      color: var(--sky);
+    }
+
+    .story-expand-btn {
+      display: block;
+      margin-top: 1.25rem;
+      background: none;
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      color: var(--sky);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .story-expand-btn:hover {
+      border-color: rgba(200, 216, 240, 0.5);
+      color: var(--cream);
+    }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(74, 111, 165, 0.2);
+      border-radius: 18px;
+      padding: 1.75rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .feature-card h4 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.2rem;
+      color: var(--moon-glow);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--sky);
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    .feature-icon {
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+      display: block;
+    }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .testimonial {
+      background: var(--card-bg);
+      border: 1px solid rgba(74, 111, 165, 0.2);
+      border-radius: 20px;
+      padding: 1.75rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .testimonial-stars {
+      color: var(--gold);
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+      letter-spacing: 0.1em;
+    }
+
+    .testimonial-text {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.05rem;
+      color: var(--moon-glow);
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+
+    .testimonial-author {
+      font-size: 0.8rem;
+      color: var(--periwinkle);
+    }
+
+    /* ── PRICING ── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 760px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    @media (max-width: 720px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+    }
+
+    .pricing-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(200, 216, 240, 0.25);
+      border-radius: 24px;
+      padding: 2.5rem;
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .pricing-badge {
+      display: inline-block;
+      background: rgba(240, 192, 96, 0.15);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.3rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 1.25rem;
+    }
+
+    .pricing-amount {
+      font-family: 'Crimson Pro', serif;
+      font-size: 3.5rem;
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1;
+    }
+
+    .pricing-amount sup {
+      font-size: 1.5rem;
+      vertical-align: top;
+      margin-top: 0.6rem;
+      display: inline-block;
+    }
+
+    .pricing-amount .per-mo {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--periwinkle);
+      margin-left: 0.2rem;
+    }
+
+    .pricing-tier-label {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--cream);
+      margin-top: 0.4rem;
+      margin-bottom: 1.5rem;
+    }
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--periwinkle);
+      margin-left: 0.2rem;
+    }
+
+    .pricing-period {
+      font-size: 0.85rem;
+      color: var(--periwinkle);
+      margin-top: 0.3rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .pricing-features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 2rem;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      font-size: 0.9rem;
+      color: var(--sky);
+      margin-bottom: 0.7rem;
+      font-weight: 300;
+    }
+
+    .pricing-features li::before {
+      content: '✦';
+      color: var(--gold);
+      font-size: 0.6rem;
+      margin-top: 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .pricing-cta {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight);
+      border: none;
+      padding: 1rem;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(240, 192, 96, 0.3);
+    }
+
+    .pricing-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 36px rgba(240, 192, 96, 0.45);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3rem 5% 2rem;
+      border-top: 1px solid rgba(74, 111, 165, 0.15);
+    }
+
+    .footer-logo {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.4rem;
+      color: var(--moon-glow);
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-links a {
+      font-size: 0.8rem;
+      color: var(--periwinkle);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--cream); }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      color: rgba(74, 111, 165, 0.6);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--periwinkle), transparent);
+      margin: 0 auto 4rem;
+    }
+
+    /* ── FORM ELEMENTS (reused on enroll.html) ── */
+    .modal {
+      background: var(--deep-navy);
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      border-radius: 28px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+    }
+
+    .modal-moon {
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-title {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.7rem;
+      font-weight: 400;
+      text-align: center;
+      color: var(--cream);
+      margin-bottom: 0.4rem;
+    }
+
+    .modal-subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--sky);
+      margin-bottom: 1.75rem;
+      font-weight: 300;
+    }
+
+    /* Step indicator */
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(74, 111, 165, 0.3);
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .step-dot.active {
+      background: var(--gold);
+      transform: scale(1.3);
+    }
+
+    .step-dot.done {
+      background: var(--periwinkle);
+    }
+
+    .step-line {
+      flex: 1;
+      max-width: 48px;
+      height: 1px;
+      background: rgba(74, 111, 165, 0.3);
+    }
+
+    /* Form */
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--sky);
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.04em;
+    }
+
+    .form-group input {
+      width: 100%;
+      background: rgba(8, 12, 36, 0.6);
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input::placeholder { color: rgba(74, 111, 165, 0.5); }
+
+    .form-group input:focus {
+      border-color: rgba(200, 216, 240, 0.6);
+      box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.15);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .btn-next, .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight);
+      border: none;
+      padding: 0.9rem;
+      border-radius: 100px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(240, 192, 96, 0.25);
+    }
+
+    .btn-next:hover, .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(240, 192, 96, 0.4);
+    }
+
+    .btn-back {
+      width: 100%;
+      background: none;
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      color: var(--sky);
+      padding: 0.7rem;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-back:hover {
+      border-color: rgba(200, 216, 240, 0.5);
+      color: var(--cream);
+    }
+
+    .modal-guarantee {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--periwinkle);
+      margin-top: 1rem;
+    }
+
+    /* Payment icons row */
+    .payment-icons {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .payment-icon {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(74, 111, 165, 0.25);
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.72rem;
+      color: var(--sky);
+      letter-spacing: 0.05em;
+    }
+
+    /* Success state */
+    .modal-success {
+      display: none;
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .success-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-success h3 {
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.8rem;
+      color: var(--cream);
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-success p {
+      font-size: 0.9rem;
+      color: var(--sky);
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    /* Error */
+    .form-error {
+      font-size: 0.75rem;
+      color: #F87171;
+      margin-top: 0.3rem;
+      display: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      .nav-links { display: none; }
+      .moon-container { width: 220px; height: 220px; top: -30px; right: -20px; }
+      .hero h1 { font-size: 2.4rem; }
+      .modal { padding: 1.75rem 1.5rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Starfield -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="logo"><span class="logo-moon">🌙</span> StoryTrail</div>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#stories">Stories</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#pricing" class="nav-cta">Get Started</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="moon-container">
+    <div class="moon"></div>
+  </div>
+
+  <p class="hero-eyebrow">Personalized Bedtime Adventures</p>
+  <h1>Every night, a story<br /><em>made just for them</em></h1>
+  <p class="hero-sub">StoryTrail weaves your child's name, favorite creatures, and secret loves into a brand-new adventure — delivered every night at bedtime.</p>
+  <a href="#pricing" class="hero-cta-btn" style="display:inline-block;text-decoration:none;">Get started</a>
+  <p class="hero-note">First 3 stories free, cancel anytime.</p>
+
+  <div class="scroll-hint">
+    <span>Explore</span>
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 3v10M3 9l5 4 5-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section" id="how">
+  <p class="section-label">The Magic Process</p>
+  <h2 class="section-title">Bedtime, made extraordinary</h2>
+  <p class="section-sub">Three simple steps and your child steps into a world built only for them — every single night.</p>
+
+  <div class="steps-grid">
+    <div class="step-card">
+      <span class="step-icon">✨</span>
+      <h3>Tell us about them</h3>
+      <p>Share your child's name, their favorite color, animal, and the things that make their eyes light up — dragons, rockets, unicorns, anything.</p>
+    </div>
+    <div class="step-card">
+      <span class="step-icon">🌙</span>
+      <h3>We craft the adventure</h3>
+      <p>Each evening, our storytelling engine weaves those details into a completely original adventure — no two nights alike, ever.</p>
+    </div>
+    <div class="step-card">
+      <span class="step-icon">📖</span>
+      <h3>Read together at bedtime</h3>
+      <p>Your story arrives before bedtime, every night, right in your inbox.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── STORY PREVIEW ── -->
+<section class="story-section" id="stories">
+  <p class="section-label">Example Stories</p>
+  <h2 class="section-title">A few nights from the trail</h2>
+  <p class="section-sub">Three samples of the kind of adventure your little dreamer's story might sound like.</p>
+
+  <div class="story-preview-grid">
+
+    <div class="story-preview-card">
+      <span class="story-tag">✦ Sample Story</span>
+      <h3>Sarah and the Yellow Door</h3>
+      <div class="story-meta">
+        <span class="story-chip">🦄 Unicorns</span>
+        <span class="story-chip">💛 Yellow</span>
+        <span class="story-chip">🌈 Rainbows</span>
+      </div>
+      <div class="story-text-preview" id="story-preview-1">Sarah was putting away her raincoat when she noticed it — a door at the very back of the closet that had never been there before. It was small and round-topped, painted the softest shade of yellow, with a handle made of smooth white stone.</div>
+      <div class="story-text-full" id="story-full-1"></div>
+      <button class="story-expand-btn" onclick="toggleStory(1)" id="story-btn-1">Read the full story</button>
+    </div>
+
+    <div class="story-preview-card">
+      <span class="story-tag">✦ Sample Story</span>
+      <h3>Ryan and the Star Rescue</h3>
+      <div class="story-meta">
+        <span class="story-chip">🚒 Firetrucks</span>
+        <span class="story-chip">❤️ Red</span>
+        <span class="story-chip">🚀 Space</span>
+      </div>
+      <div class="story-text-preview" id="story-preview-2">Ryan kept his toy firetruck on his windowsill every night, parked carefully beside the glass, ladder pointing up toward the stars like it was getting ready for the world's tallest rescue. Tonight, the firetruck was glowing.</div>
+      <div class="story-text-full" id="story-full-2"></div>
+      <button class="story-expand-btn" onclick="toggleStory(2)" id="story-btn-2">Read the full story</button>
+    </div>
+
+    <div class="story-preview-card">
+      <span class="story-tag">✦ Sample Story</span>
+      <h3>Mia and the Purple Ocean</h3>
+      <div class="story-meta">
+        <span class="story-chip">🦕 Dinosaurs</span>
+        <span class="story-chip">💜 Purple</span>
+        <span class="story-chip">🧜 Mermaids</span>
+      </div>
+      <div class="story-text-preview" id="story-preview-3">One evening, Mia was sitting at the edge of the bathtub, trailing her fingers through the water, when she noticed something strange. The water wasn't staying still the way it usually did. And then, very quietly, it spoke.</div>
+      <div class="story-text-full" id="story-full-3"></div>
+      <button class="story-expand-btn" onclick="toggleStory(3)" id="story-btn-3">Read the full story</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="section">
+  <p class="section-label">Why StoryTrail</p>
+  <h2 class="section-title">Built for little dreamers</h2>
+  <div class="divider"></div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">🎭</span>
+      <h4>Truly personalized</h4>
+      <p>Your child is always the hero, and every detail — from their favorite color to the creature they adore — is woven into the story's fabric.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔁</span>
+      <h4>Fresh every night</h4>
+      <p>No repeats, no reruns. A brand-new adventure lands each evening, so bedtime never gets old.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">👨‍👩‍👧</span>
+      <h4>Made for reading aloud</h4>
+      <p>Stories are written with rhythm, pace, and wonder in mind — ideal for parents to read aloud or children to follow along.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🌙</span>
+      <h4>Right on time</h4>
+      <p>Every story lands in your inbox before bedtime, in your own time zone — no app to open, nothing to remember.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOUNDING FAMILIES ── -->
+<section class="section">
+  <p class="section-label">Just Getting Started</p>
+  <h2 class="section-title">Be one of our first families</h2>
+  <p class="section-sub">StoryTrail is brand new. We're inviting a small group of families in first — free — to help us make it great before anyone else gets in.</p>
+</section>
+
+
+<!-- ── PRICING ── -->
+<section class="section" id="pricing">
+  <p class="section-label">Simple Pricing</p>
+  <h2 class="section-title">One price, infinite adventures</h2>
+  <p class="section-sub">First 3 stories free. Stay because they won't let you stop.</p>
+  <div class="divider"></div>
+
+  <div class="pricing-grid">
+
+    <div class="pricing-card">
+      <div class="pricing-badge">✦ First 3 stories free ✦</div>
+      <div class="pricing-amount">$9<span class="per-mo">/mo</span></div>
+      <p class="pricing-tier-label">1 child</p>
+      <ul class="pricing-features">
+        <li>A new personalized story delivered every night</li>
+        <li>Made for one child, written just for them</li>
+        <li>Delivered straight to your email before bedtime</li>
+        <li>Update their favorites anytime</li>
+        <li>Cancel anytime, no questions asked</li>
+      </ul>
+      <a href="enroll-v2.html" class="pricing-cta" style="display:inline-block;text-decoration:none;text-align:center;">Get your first story now</a>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-badge">✦ First 3 stories free ✦</div>
+      <div class="pricing-amount">$19<span class="per-mo">/mo</span></div>
+      <p class="pricing-tier-label">2+ children</p>
+      <ul class="pricing-features">
+        <li>A new personalized story for every child, every night</li>
+        <li>Each child gets their own story, written just for them</li>
+        <li>One flat price, however many kids you add</li>
+        <li>Update anyone's favorites anytime</li>
+        <li>Cancel anytime, no questions asked</li>
+      </ul>
+      <a href="enroll-v2-family.html" class="pricing-cta" style="display:inline-block;text-decoration:none;text-align:center;">Get your first story now</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">🌙 StoryTrail</div>
+  <ul class="footer-links">
+    <li><a href="#">About</a></li>
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <p class="footer-copy">© 2025 StoryTrail Inc. Sweet dreams guaranteed.</p>
+</footer>
+
+<script>
+  // ── STARS ──
+  const canvas = document.getElementById('stars-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    const count = Math.floor((canvas.width * canvas.height) / 4000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.2,
+        alpha: Math.random(),
+        speed: Math.random() * 0.008 + 0.002,
+        dir: Math.random() > 0.5 ? 1 : -1
+      });
+    }
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    stars.forEach(s => {
+      s.alpha += s.speed * s.dir;
+      if (s.alpha > 1 || s.alpha < 0.1) s.dir *= -1;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200, 216, 240, ${s.alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => { resize(); initStars(); });
+  resize();
+  initStars();
+  drawStars();
+
+  // Full sample story text -- used by the expandable preview cards
+  const sampleStories = ["Sarah was putting away her raincoat when she noticed it — a door at the very back of the closet that had never been there before. It was small and round-topped, painted the softest shade of yellow, with a handle made of smooth white stone. She didn't feel afraid of it. She felt curious, the way you feel when you find a interesting shell on the beach and want to know what lives inside.\n\nShe turned the handle, and the door swung open onto a path made of pale golden grass that stretched away into a gentle morning light.\n\nSarah stepped through.\n\nThe world on the other side looked almost like her own town — there was a bakery on a corner, and a little park with a fountain, and houses with gardens. But everything was just slightly different. The streetlamps grew like tall flowers, curling at the top. The clouds were softer, slower, shaped like sleeping animals. The colors were a little warmer, as if someone had turned up the glow on everything just a notch.\n\nStanding in the middle of the path was a unicorn.\n\nShe was small, about the height of a large dog, with a coat the color of fresh cream and a mane that shifted between soft gold and white depending on how she moved. She didn't say hello. Instead, she lowered her horn and drew a glowing picture in the air — a little sketch of a basket, then a house with a yellow door, then a small figure waiting by a window.\n\nSarah understood immediately. \"You need me to deliver something,\" she said.\n\nThe unicorn nodded and nudged a small basket toward her with her nose. Inside, wrapped in cloth the color of sunshine, was a jar of something that glowed faintly — warm and golden, like captured afternoon light. Sarah didn't know what it was exactly, but it smelled like warm bread and rain on dry grass and something she couldn't name but that made her feel perfectly safe.\n\nThey walked together through the almost-familiar streets. The unicorn guided her by drawing small glowing arrows in the air whenever they reached a corner — one pointing left near the flower-lamp, one pointing right past a garden where rainbow-colored birds sat quietly on the fence, heads tucked under their wings.\n\nAt one point the path dipped through a low tunnel of tangled vines and Sarah had to duck, and for just a moment she couldn't see where she was going. But the unicorn's horn glowed steadily ahead of her, a warm yellow-white light, and she followed it without worry until they stepped out the other side into open air again.\n\nThe house with the yellow door was on a quiet lane near the edge of town. An old woman sat by the window, her chin resting on her hand, watching the path. When she saw Sarah coming, her whole face lifted.\n\nSarah handed her the basket. The old woman opened the cloth, and the golden glow spread gently across her hands and her face and the glass of the window.\n\nShe drew a picture in the air then too — just like the unicorn did. A simple glowing picture of a sun rising.\n\nSarah smiled. She thought she understood. Something that had been dark was going to be a little lighter now. That was enough.\n\nThe walk back felt shorter, the way walks home usually do. The unicorn guided her all the way to the round yellow door, which was waiting right where they had left it, open just a crack, the light of Sarah's closet spilling through.\n\nThe unicorn drew one last picture — a small girl in a bed, tucked in, eyes closed, peaceful.\n\nSarah laughed quietly. \"I know,\" she said. \"It's time.\"\n\nShe gave the unicorn one gentle pat on her soft nose, stepped through the door, and heard it close behind her with a sound like a quiet sigh.\n\nShe hung up her raincoat, padded down the hall, and climbed into bed.\n\nOutside her window, the sky was the deep, soft blue of late evening, and somewhere far above it, she was pretty sure, a small unicorn was making her way home too.", "Ryan kept his toy firetruck on his windowsill every night, parked carefully beside the glass, ladder pointing up toward the stars like it was getting ready for the world's tallest rescue.\n\nTonight, the firetruck was glowing.\n\nRyan sat up in bed, rubbing his eyes, certain he was imagining it. But the little red truck kept glowing, brighter and brighter, until it was nearly as big as the real ones that roared past his house sometimes with their sirens singing.\n\n\"Climb in,\" said a voice, low and friendly, like an engine humming at rest. \"We've got a call.\"\n\nThe firetruck — somehow now exactly Ryan-sized — had a face now too, kind headlight eyes and a grille that curved into something like a smile.\n\n\"What's your name?\" Ryan asked, climbing up into the driver's seat, which fit him perfectly.\n\n\"Captain Ruby,\" the firetruck said. \"And tonight's call isn't a fire. It's a star. One of them's gotten loose from its spot up there and can't find its way back.\"\n\nRuby's engine rumbled to life, and instead of rolling down the driveway, she lifted straight up off the ground, ladder folding neatly against her red sides as they rose past the rooftop, past the clouds, until the whole sleeping town glowed gold and tiny below them.\n\n\"There,\" Ruby said, pointing her headlights toward a single star blinking anxiously off to the side of its constellation, dimmer than the others, drifting slowly further away with every second.\n\n\"Is it scared?\" Ryan asked.\n\n\"Lost stars usually are,\" Ruby said. \"But that's what we're here for.\"\n\nThey sped through the dark, Ruby's siren humming a soft, gentle tune instead of a loud wail — a lullaby siren, just for nighttime rescues. As they got closer, Ryan could see the star was small, no bigger than a marble, spinning in slow, worried circles.\n\n\"Hello,\" Ryan called out, leaning over the side. \"We're here to help you home.\"\n\nThe little star blinked, surprised, then drifted shyly closer.\n\n\"Extend the ladder,\" Ryan said, the way he'd practiced a hundred times with his toy truck on the living room floor.\n\nRuby's ladder unfolded smoothly, stretching out toward the star, who climbed on with a soft, twinkling hop, settling right at the very top rung like it was the safest seat in the sky.\n\n\"Hold tight,\" Ryan told the star, and together they turned back toward the constellation, the star's worried blinking slowing into something calmer, steadier, the closer they got to home.\n\nThe constellation came into view — seven stars arranged like a gentle, curving smile, with one empty spot waiting right in the middle.\n\n\"Right there,\" Ruby said, easing the ladder up until the little star could reach its spot.\n\nThe star settled in with a soft, happy shimmer, and immediately the whole constellation seemed to glow a little warmer, a little steadier, like a puzzle finally finished.\n\n\"Thank you,\" the star seemed to say, though it was more of a feeling than actual words — warm and grateful, settling over Ryan like a blanket.\n\n\"That's what we do,\" Ryan said proudly, patting Ruby's dashboard.\n\nRuby's siren hummed once more, satisfied, and they began drifting back down through the clouds, past the rooftops, toward Ryan's window, which was still glowing faintly gold from the porch light below.\n\n\"Good work tonight, Captain,\" Ruby said, as Ryan climbed back through his window and into bed.\n\n\"Will there be another call tomorrow?\" Ryan asked, already half-asleep.\n\n\"There's always another call,\" Ruby said softly, settling back onto the windowsill, shrinking gently back down to her regular toy size, ladder folding neatly into place. \"But for now — rest. Even firetrucks need their sleep.\"\n\nRyan smiled, pulling his blankets up to his chin, and drifted off to sleep with the stars shining steady and bright outside his window, every single one exactly where it belonged.", "One evening, Mia was sitting at the edge of the bathtub, trailing her fingers through the water, when she noticed something strange. The water wasn't staying still the way it usually did. It was swirling in a slow, gentle spiral, almost like it was trying to tell her something. And then, very quietly, it did.\n\n\"Hello,\" said the water.\n\nMia blinked. She wasn't frightened, not exactly. Just very, very curious. \"Hello,\" she said back, because it seemed like the right thing to do.\n\nThe water shimmered, and the bathtub seemed to grow — or maybe Mia grew smaller, she wasn't quite sure — until she was floating in the most unusual ocean she had ever seen. The water here was the softest shade of purple, lit from somewhere far below with a warm, gentle glow. Clouds of tiny silver bubbles drifted upward like slow-motion snow falling the wrong way. Plants grew sideways instead of up. And Mia, somehow, could breathe perfectly fine.\n\nStanding nearby — or floating, really — was a girl about Mia's age, looking equally amazed and a little bit delighted. She had dark braids and was wearing a yellow raincoat that didn't seem to mind being underwater at all.\n\n\"I'm Priya,\" the girl said. \"Did the water talk to you too?\"\n\n\"It did,\" said Mia. \"I think it wanted us to come here.\"\n\nPriya pointed ahead, where a long-necked dinosaur — a Plesiosaur, the swimming kind, with flippers like paddles — was hovering near a cluster of coral shaped like candelabras. On the other side of the coral, a mermaid with a shimmering green tail sat with her arms crossed and her eyes looking very determinedly at nothing in particular.\n\nNeither the dinosaur nor the mermaid was looking at the other. But both of them looked quietly, deeply sad.\n\nMia and Priya swam a little closer. Slowly, so as not to startle anyone.\n\n\"What happened?\" Mia asked gently.\n\nThe Plesiosaur let out a long, bubbling sigh. She explained that she had been gathering the coral candelabras — not to keep, just to look at them up close. She loved beautiful things and sometimes forgot to ask first. When the mermaid arrived and found them moved, she thought someone had taken them away on purpose, just to be unkind.\n\nThe mermaid's chin wobbled a little when she heard this. \"I didn't know,\" she admitted quietly. \"I thought you didn't care about my garden.\"\n\n\"I cared about it so much I couldn't stop looking,\" said the Plesiosaur.\n\nPriya had a good idea. \"Could you look at it together?\" she asked. \"Then you'd both know.\"\n\nIt was such a simple thing. But the mermaid uncrossed her arms, and the Plesiosaur swam a little closer, and the two of them began pointing out their favorite parts of the garden to each other. This spiral piece. That one that glowed faintly pink. The one that looked a little like a sleeping cat if you tilted your head just right.\n\nMia and Priya sat on the seafloor together, watching, not needing to do anything else. Around them, the purple water glowed a little brighter. The silver bubbles drifted upward a little more slowly, as if the whole ocean had relaxed.\n\nAfter a while, the mermaid and the Plesiosaur seemed so absorbed in conversation that they hardly needed an audience anymore. The water began to shimmer again, the way it had at the very beginning.\n\nPriya smiled at Mia. \"I think we did what we came to do,\" she said.\n\nMia nodded. She felt the way you feel at the end of a long, good day — not tired exactly, but settled. Full, somehow, in a quiet way.\n\nThe purple water rose around her like a soft blanket, warm and slow, and carried her gently all the way home."];
+
+  function toggleStory(num) {
+    const fullEl = document.getElementById(`story-full-${num}`);
+    const previewEl = document.getElementById(`story-preview-${num}`);
+    const btnEl = document.getElementById(`story-btn-${num}`);
+
+    const isOpen = fullEl.style.display === 'block';
+
+    if (isOpen) {
+      fullEl.style.display = 'none';
+      previewEl.style.display = 'block';
+      btnEl.textContent = 'Read the full story';
+    } else {
+      if (!fullEl.textContent) {
+        fullEl.textContent = sampleStories[num - 1];
+      }
+      fullEl.style.display = 'block';
+      previewEl.style.display = 'none';
+      btnEl.textContent = 'Show less';
+    }
+  }
+
+</script>
+</body>
+</html>
