@@ -706,11 +706,13 @@
     }
 
     .founder-photo {
-      width: 100%;
-      max-width: 340px;
-      border-radius: 20px;
-      border: 1px solid rgba(74, 111, 165, 0.3);
       display: block;
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      border-radius: 20px;
+      border: 1px solid rgba(74, 111, 165, 0.4);
+      box-shadow: 0 8px 36px rgba(0, 0, 0, 0.3);
     }
 
     .founder-content {
@@ -1297,10 +1299,12 @@
 <section class="founder-section">
   <div class="founder-inner">
     <div>
-      <img src="family-photo.jpg" alt="Kevin, founder of StoryTrail" class="founder-photo" />
+      <div style="width:100%;max-width:300px;">
+        <img src="family-photo.jpg" alt="Kevin, founder of StoryTrail" class="founder-photo" />
+      </div>
     </div>
     <div class="founder-content">
-      <p class="section-label">Why I built this</p>
+      <p class="section-label" style="color:var(--gold);">Why I built this</p>
       <h2>Bedtime was the best part of my day. I wanted to make it that way for everyone.</h2>
       <p>When my son was four, I started making up bedtime stories for him — ones where he was the hero, where his favorite dinosaur showed up, where things turned out okay. He'd fall asleep mid-story, and I'd feel like the best dad in the world.</p>
       <p>What I didn't expect was how much I loved those 15 minutes. No screens, no noise, just his imagination and mine meeting somewhere in the dark. I wanted every family to have that — not just the ones lucky enough to have a parent who happens to enjoy spinning yarns at 8pm.</p>
