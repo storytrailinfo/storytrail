@@ -622,6 +622,14 @@
       box-shadow: 0 4px 24px rgba(240, 192, 96, 0.3);
     }
 
+    .pricing-fine-print {
+      font-size: 0.72rem;
+      color: var(--periwinkle);
+      margin-top: 0.85rem;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
     .pricing-cta:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 36px rgba(240, 192, 96, 0.45);
@@ -651,19 +659,18 @@
 
     .faq-icon {
       flex-shrink: 0;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 1px solid rgba(240, 192, 96, 0.4);
-      color: var(--gold);
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.9rem;
-      transition: transform 0.25s ease;
+      color: var(--gold);
+      opacity: 0.75;
+      transition: transform 0.3s ease, opacity 0.2s ease;
     }
 
-    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-item.open .faq-icon { transform: rotate(180deg); opacity: 1; }
+    .faq-question:hover .faq-icon { opacity: 1; }
 
     .faq-answer {
       max-height: 0;
@@ -679,6 +686,78 @@
     .faq-item.open .faq-answer {
       max-height: 320px;
       padding: 0 0.25rem 1.25rem;
+    }
+
+
+    /* ── FOUNDER SECTION ── */
+    .founder-section {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 5%;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .founder-inner {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 3.5rem;
+      align-items: start;
+    }
+
+    .founder-photo {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      object-position: center top;
+      border-radius: 20px;
+      border: 1px solid rgba(74, 111, 165, 0.3);
+      filter: grayscale(20%);
+    }
+
+    .founder-content {
+      padding-top: 0.5rem;
+    }
+
+    .founder-content .section-label {
+      text-align: left;
+      margin-bottom: 0.75rem;
+    }
+
+    .founder-content h2 {
+      font-family: 'Crimson Pro', serif;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+
+    .founder-content p {
+      font-size: 0.975rem;
+      color: var(--sky);
+      line-height: 1.8;
+      font-weight: 300;
+      margin-bottom: 1rem;
+    }
+
+    .founder-sig {
+      margin-top: 1.5rem;
+      font-family: 'Crimson Pro', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--moon-glow);
+    }
+
+    @media (max-width: 640px) {
+      .founder-inner {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      .founder-photo {
+        aspect-ratio: 4/3;
+        max-height: 280px;
+      }
     }
 
     /* ── FOOTER ── */
@@ -945,6 +1024,23 @@
       .steps-grid { grid-template-columns: 1fr; }
     }
   </style>
+  <!-- Meta Pixel base code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '2216558948882284');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=2216558948882284&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel base code -->
 </head>
 <body>
 
@@ -971,8 +1067,8 @@
   <p class="hero-eyebrow">Personalized Bedtime Adventures</p>
   <h1>Every night, a story<br /><em>made just for them</em></h1>
   <p class="hero-sub">StoryTrail weaves your child's name, favorite creatures, and everything they love into a brand-new adventure — delivered to your inbox every night at bedtime.</p>
-  <a href="#pricing" class="hero-cta-btn" style="display:inline-block;text-decoration:none;">Get started</a>
-  <p class="hero-note">First 3 stories free, cancel anytime.</p>
+  <a href="#pricing" class="hero-cta-btn" style="display:inline-block;text-decoration:none;">Get Your First 3 Stories Free</a>
+  <p class="hero-note">3 night free trial · Cancel anytime</p>
 
   <div class="scroll-hint">
     <span>Explore</span>
@@ -1116,6 +1212,7 @@
         <li>Cancel anytime, no questions asked</li>
       </ul>
       <a href="enroll-v2.html" class="pricing-cta" style="display:inline-block;text-decoration:none;text-align:center;">Get your first story now</a>
+      <p class="pricing-fine-print">3-night free trial · No charge today · Cancel anytime</p>
     </div>
 
     <div class="pricing-card">
@@ -1130,6 +1227,7 @@
         <li>Cancel anytime, no questions asked</li>
       </ul>
       <a href="enroll-v2-family.html" class="pricing-cta" style="display:inline-block;text-decoration:none;text-align:center;">Get your first story now</a>
+      <p class="pricing-fine-print">3-night free trial · No charge today · Cancel anytime</p>
     </div>
 
   </div>
@@ -1144,45 +1242,64 @@
   <div class="faq-list">
 
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-question"><span>How does this work?</span><span class="faq-icon">+</span></div>
+      <div class="faq-question"><span>How does this work?</span><span class="faq-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
       <div class="faq-answer">You tell us your child's name, age, and a few things they love — their favorite color, animal, whatever they're into right now. Every night, we write a brand-new bedtime story starring them, built around those details, and email it straight to you before bedtime.</div>
     </div>
 
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-question"><span>Is the content safe for kids?</span><span class="faq-icon">+</span></div>
+      <div class="faq-question"><span>Is the content safe for kids?</span><span class="faq-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
       <div class="faq-answer">Yes. Every story is written specifically for bedtime — gentle, calm, age-appropriate, with no scary content, no violence, and nothing meant to overstimulate right before sleep.</div>
     </div>
 
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-question"><span>Can I update my child's favorites later?</span><span class="faq-icon">+</span></div>
+      <div class="faq-question"><span>Can I update my child's favorites later?</span><span class="faq-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
       <div class="faq-answer">Anytime. Kids' interests change fast — every email includes a link to update their favorite color, animal, or anything else in seconds. Tomorrow's story will reflect it.</div>
     </div>
 
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-question"><span>What if I don't like a story?</span><span class="faq-icon">+</span></div>
+      <div class="faq-question"><span>What if I don't like a story?</span><span class="faq-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
       <div class="faq-answer">Every email has a "get a new one" link. You can regenerate a fresh story up to 3 times a day, no questions asked.</div>
     </div>
 
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-question"><span>What if I have more than one kid?</span><span class="faq-icon">+</span></div>
+      <div class="faq-question"><span>What if I have more than one kid?</span><span class="faq-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
       <div class="faq-answer">Our family plan covers up to 4 children for one flat $19/month — each child gets their own story, written just for them, every night.</div>
     </div>
 
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-question"><span>What if the email doesn't show up?</span><span class="faq-icon">+</span></div>
+      <div class="faq-question"><span>What if the email doesn't show up?</span><span class="faq-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
       <div class="faq-answer">First, check your spam or promotions folder — we're a new sender, so some inboxes are extra cautious at first. Replying to one of our emails helps a lot. Still nothing? Just email us at storytrailinfo@gmail.com and we'll sort it out.</div>
     </div>
 
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-question"><span>How does the free trial work, and what happens after?</span><span class="faq-icon">+</span></div>
+      <div class="faq-question"><span>How does the free trial work, and what happens after?</span><span class="faq-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
       <div class="faq-answer">Your first 3 stories are completely free — no charge up front. After that, your card is billed automatically at $9/month (1 child) or $19/month (2-4 children), unless you cancel before then.</div>
     </div>
 
     <div class="faq-item" onclick="toggleFaq(this)">
-      <div class="faq-question"><span>Can I cancel anytime?</span><span class="faq-icon">+</span></div>
+      <div class="faq-question"><span>Can I cancel anytime?</span><span class="faq-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
       <div class="faq-answer">Yes, anytime, no phone calls or emails required. Every email includes a link to manage your account, where you can cancel in a couple clicks.</div>
     </div>
 
+  </div>
+</section>
+
+
+
+<!-- ── WHY I BUILT THIS ── -->
+<section class="founder-section">
+  <div class="founder-inner">
+    <div>
+      <img src="family-photo.jpg" alt="Kevin, founder of StoryTrail" class="founder-photo" />
+    </div>
+    <div class="founder-content">
+      <p class="section-label">Why I built this</p>
+      <h2>Bedtime was the best part of my day. I wanted to make it that way for everyone.</h2>
+      <p>When my daugher turned four, I started making up bedtime stories for her — ones where she was the hero, where her favorite dinosaur showed up, where things turned out okay. She'd fall asleep mid-story, and I'd feel like the best dad in the world.</p>
+      <p>What I didn't expect was how much I loved those 15 minutes. No screens, no noise, just her imagination and mine meeting somewhere in the dark. I wanted every family to have that - without worring about coming up with elaborate stories every night.</p>
+      <p>So I built StoryTrail. A new story every night, written just for your child, delivered before bedtime. You read. They drift off. That's it.</p>
+      <div class="founder-sig">— Kevin, founder</div>
+    </div>
   </div>
 </section>
 
