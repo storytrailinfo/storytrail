@@ -556,6 +556,11 @@
           <h1>Users</h1>
           <input type="text" class="search-input" id="users-search" placeholder="Search by name or email..." oninput="renderUsers()" />
           <div class="sort-bar">
+            <span style="color: var(--periwinkle); font-size: 0.85rem;">Show:</span>
+            <button class="sort-btn active" id="users-filter-active" onclick="setUsersFilter('active')">Active</button>
+            <button class="sort-btn" id="users-filter-churned" onclick="setUsersFilter('churned')">Canceled</button>
+          </div>
+          <div class="sort-bar">
             <span style="color: var(--periwinkle); font-size: 0.85rem;">Sort:</span>
             <button class="sort-btn active" id="users-sort-created" onclick="setUsersSort('created')">Date Created ↓</button>
             <button class="sort-btn" id="users-sort-name" onclick="setUsersSort('name')">Name A–Z</button>
@@ -611,6 +616,8 @@
 
     let adminPassword = '';
     let allUsers = [];
+    let allChurned = [];
+    let usersFilter = 'active';
     let allLogs = [];
     let usersSort = 'created';
     let logsFilter = 'all';
@@ -745,6 +752,7 @@
         const result = await fetchFromServer('users');
         if (result) {
           allUsers = result.users || [];
+          allChurned = result.churned || [];
           renderUsers();
         }
       }
@@ -997,15 +1005,24 @@
       }) + ' ET';
     }
 
+    function setUsersFilter(filter) {
+      usersFilter = filter;
+      document.getElementById('users-filter-active').classList.toggle('active', filter === 'active');
+      document.getElementById('users-filter-churned').classList.toggle('active', filter === 'churned');
+      renderUsers();
+    }
+
     function renderUsers() {
       const listEl = document.getElementById('user-list');
 
-      if (!allUsers || allUsers.length === 0) {
-        listEl.innerHTML = '<tr><td colspan="6" class="empty">No users yet.</td></tr>';
+      const sourceData = usersFilter === 'churned' ? allChurned : allUsers;
+
+      if (!sourceData || sourceData.length === 0) {
+        listEl.innerHTML = `<tr><td colspan="6" class="empty">${usersFilter === 'churned' ? 'No canceled customers.' : 'No users yet.'}</td></tr>`;
         return;
       }
 
-      const withNames = allUsers.map(user => ({
+      const withNames = sourceData.map(user => ({
         ...user,
         _displayName: `${user.parent_first_name || ''} ${user.parent_last_name || ''}`.trim() || 'Unnamed parent',
       }));
@@ -1062,19 +1079,26 @@
           <tr>
             <td colspan="6" style="padding: 0;">
               <div class="item-full" id="user-${i}" style="margin: 0; padding: 0 0.9rem;">
-                <div class="detail-row"><span class="detail-label">Child's name</span><span class="detail-value">${escapeHtml(user.child_name)}</span></div>
-                <div class="detail-row"><span class="detail-label">Age</span><span class="detail-value">${user.child_age}</span></div>
-                <div class="detail-row"><span class="detail-label">Favorite color</span><span class="detail-value">${escapeHtml(user.favorite_color || 'Not given')}</span></div>
-                <div class="detail-row"><span class="detail-label">Favorite animal</span><span class="detail-value">${escapeHtml(user.favorite_animal || 'Not given')}</span></div>
-                <div class="detail-row"><span class="detail-label">Things they love</span><span class="detail-value">${escapeHtml(themes)}</span></div>
-                <div class="detail-row"><span class="detail-label">Time zone</span><span class="detail-value">${escapeHtml(user.timezone)}</span></div>
-                <div class="detail-row"><span class="detail-label">Next story</span><span class="detail-value">${formatNextSend(user.next_send_at)}</span></div>
-                <div class="detail-row"><span class="detail-label">Stories generated</span><span class="detail-value">${user.story_count}</span></div>
-                <div class="detail-row"><span class="detail-label">Subscribed since</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span></div>
+                ${user._churned ? `
+                  <div class="detail-row"><span class="detail-label">Canceled</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span></div>
+                  <div class="detail-row"><span class="detail-label">Plan</span><span class="detail-value">${user.subscription_tier === 'family' ? 'Family ($19/mo)' : 'Single ($9/mo)'}</span></div>
+                  <div class="detail-row"><span class="detail-label">Reason</span><span class="detail-value">${user.churn_reason === 'self_canceled' ? 'Self-canceled' : 'Admin canceled'}</span></div>
+                ` : `
+                  <div class="detail-row"><span class="detail-label">Child's name</span><span class="detail-value">${escapeHtml(user.child_name)}</span></div>
+                  <div class="detail-row"><span class="detail-label">Age</span><span class="detail-value">${user.child_age}</span></div>
+                  <div class="detail-row"><span class="detail-label">Favorite color</span><span class="detail-value">${escapeHtml(user.favorite_color || 'Not given')}</span></div>
+                  <div class="detail-row"><span class="detail-label">Favorite animal</span><span class="detail-value">${escapeHtml(user.favorite_animal || 'Not given')}</span></div>
+                  <div class="detail-row"><span class="detail-label">Things they love</span><span class="detail-value">${escapeHtml(themes)}</span></div>
+                  <div class="detail-row"><span class="detail-label">Time zone</span><span class="detail-value">${escapeHtml(user.timezone)}</span></div>
+                  <div class="detail-row"><span class="detail-label">Next story</span><span class="detail-value">${formatNextSend(user.next_send_at)}</span></div>
+                  <div class="detail-row"><span class="detail-label">Stories generated</span><span class="detail-value">${user.story_count}</span></div>
+                  <div class="detail-row"><span class="detail-label">Subscribed since</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span></div>
+                `}
+                ${!user._churned ? `
                 <button class="copy-link-btn" id="manage-btn-${i}"
                   onclick="event.stopPropagation(); openManageAccount('${user.parent_id || user.id}')">
                   Open manage account
-                </button>
+                </button>` : ''}
               </div>
             </td>
           </tr>
