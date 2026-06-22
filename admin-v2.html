@@ -1084,6 +1084,11 @@
       }).join('');
     }
 
+    function toggleItem(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
     function openManageAccount(parentId) {
       window.open(`https://storytrail.shop/manage-account?id=${parentId}`, '_blank');
     }
