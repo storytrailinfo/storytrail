@@ -22,6 +22,16 @@
 
     window.storytrailEventId = 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2);
 
+    // Capture Facebook Click ID (fbclid) from URL and store as cookie
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const fbclid = urlParams.get('fbclid');
+      if (fbclid) {
+        const fbc = 'fb.1.' + Date.now() + '.' + fbclid;
+        document.cookie = 'fbc=' + encodeURIComponent(fbc) + '; path=/; max-age=7776000; SameSite=Lax';
+      }
+    })();
+
     fbq('init', '2216558948882284');
     fbq('track', 'PageView');
   </script>
@@ -582,6 +592,10 @@
             payment_method_id: paymentMethod.id,
             children: childrenData,
             meta_event_id: window.storytrailEventId,
+            fbc: (function() {
+              const match = document.cookie.match(/(?:^|;\s*)fbc=([^;]*)/);
+              return match ? decodeURIComponent(match[1]) : null;
+            })(),
           }),
         });
 
