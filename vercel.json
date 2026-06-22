@@ -2,8 +2,11 @@
   "rewrites": [
     { "source": "/admin", "destination": "/admin-v2.html" },
     { "source": "/enroll", "destination": "/enroll-v2.html" },
+    { "source": "/enroll-family", "destination": "/enroll-v2-family.html" },
     { "source": "/thank-you", "destination": "/thank-you-v2.html" },
     { "source": "/update-preferences", "destination": "/update-preferences.html" },
+    { "source": "/manage-account", "destination": "/manage-account.html" },
+    { "source": "/regenerate-story", "destination": "/regenerate-story.html" },
     { "source": "/about", "destination": "/about-v2.html" },
     { "source": "/privacy", "destination": "/privacy-v2.html" },
     { "source": "/terms", "destination": "/terms-v2.html" },
