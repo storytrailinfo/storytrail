@@ -354,6 +354,88 @@
       cursor: not-allowed;
     }
 
+
+    /* ── ADMIN EDIT INPUTS ── */
+    .admin-edit-input {
+      width: 100%;
+      background: rgba(8, 12, 36, 0.5);
+      border: 1px solid rgba(74, 111, 165, 0.3);
+      border-radius: 8px;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .admin-edit-input:focus { border-color: rgba(200, 216, 240, 0.5); }
+
+    .admin-edit-select {
+      width: 100%;
+      background: rgba(8, 12, 36, 0.5);
+      border: 1px solid rgba(74, 111, 165, 0.3);
+      border-radius: 8px;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--cream);
+      outline: none;
+    }
+
+    .admin-save-btn {
+      display: block;
+      margin-top: 1rem;
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--midnight);
+      border: none;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      padding: 0.55rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .admin-save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .manage-account-btn {
+      display: block;
+      margin-top: 0.6rem;
+      width: 100%;
+      background: rgba(74, 111, 165, 0.12);
+      border: 1px solid rgba(74, 111, 165, 0.35);
+      color: var(--sky);
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      padding: 0.55rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .manage-account-btn:hover { background: rgba(74, 111, 165, 0.2); color: var(--cream); }
+
+    .cancel-account-btn {
+      display: block;
+      margin-top: 0.6rem;
+      width: 100%;
+      background: rgba(226, 75, 74, 0.08);
+      border: 1px solid rgba(226, 75, 74, 0.3);
+      color: #F09595;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      padding: 0.55rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .cancel-account-btn:hover:not(:disabled) { background: rgba(226, 75, 74, 0.16); }
+    .cancel-account-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
     .already-inactive {
       margin-top: 0.6rem;
       text-align: center;
@@ -606,6 +688,7 @@
     const UNSUBSCRIBE_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/unsubscribe-child";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
     const V2_DASHBOARD_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/admin-v2-dashboard";
+    const MANAGE_ACCOUNT_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/manage-account";
 
     let adminPassword = '';
     let allUsers = [];
@@ -1003,8 +1086,6 @@
         return;
       }
 
-      // Pre-compute display name once per user, since both search and
-      // the "Name A-Z" sort need it.
       const withNames = allUsers.map(user => ({
         ...user,
         _displayName: `${user.parent_first_name || ''} ${user.parent_last_name || ''}`.trim() || 'Unnamed parent',
@@ -1036,7 +1117,6 @@
           const diff = new Date(a.next_send_at || 0) - new Date(b.next_send_at || 0);
           return usersSortDirection === 'desc' ? -diff : diff;
         }
-        // 'created'
         const diff = new Date(a.created_at) - new Date(b.created_at);
         return usersSortDirection === 'desc' ? -diff : diff;
       });
@@ -1046,7 +1126,7 @@
         const statusBadge = user.active
           ? '<span class="badge badge-active">Active</span>'
           : '<span class="badge badge-inactive">Inactive</span>';
-        const themes = (user.theme_tags || []).join(', ') || 'None given';
+        const themes = (user.theme_tags || []).join(', ') || '';
 
         const mainRow = `
           <tr onclick="toggleItem('user-${i}')" style="cursor: pointer;">
@@ -1059,24 +1139,99 @@
           </tr>
         `;
 
+        // Format next_send_at as datetime-local value (YYYY-MM-DDTHH:MM)
+        const nextSendLocal = user.next_send_at
+          ? new Date(user.next_send_at).toISOString().slice(0, 16)
+          : '';
+
         const detailRow = `
           <tr>
             <td colspan="6" style="padding: 0;">
-              <div class="item-full" id="user-${i}" style="margin: 0; padding: 0 0.9rem;">
-                <div class="detail-row"><span class="detail-label">Child's name</span><span class="detail-value">${escapeHtml(user.child_name)}</span></div>
-                <div class="detail-row"><span class="detail-label">Age</span><span class="detail-value">${user.child_age}</span></div>
-                <div class="detail-row"><span class="detail-label">Favorite color</span><span class="detail-value">${escapeHtml(user.favorite_color || 'Not given')}</span></div>
-                <div class="detail-row"><span class="detail-label">Favorite animal</span><span class="detail-value">${escapeHtml(user.favorite_animal || 'Not given')}</span></div>
-                <div class="detail-row"><span class="detail-label">Things they love</span><span class="detail-value">${escapeHtml(themes)}</span></div>
-                <div class="detail-row"><span class="detail-label">Time zone</span><span class="detail-value">${escapeHtml(user.timezone)}</span></div>
-                <div class="detail-row"><span class="detail-label">Next story</span><span class="detail-value">${formatNextSend(user.next_send_at)}</span></div>
-                <div class="detail-row"><span class="detail-label">Stories generated</span><span class="detail-value">${user.story_count}</span></div>
-                <div class="detail-row"><span class="detail-label">Subscribed since</span><span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span></div>
-                <button class="copy-link-btn" id="copy-btn-${i}" onclick="event.stopPropagation(); copyPreferencesLink('${user.id}', ${i})">Copy update-preferences link</button>
-                ${user.active
-                  ? `<button class="unsubscribe-btn" id="unsub-btn-${i}" onclick="event.stopPropagation(); unsubscribeUser('${user.id}', ${i}, '${escapeHtml(user.child_name)}')">Unsubscribe from emails</button>`
-                  : `<div class="already-inactive">This child is already unsubscribed.</div>`
-                }
+              <div class="item-full" id="user-${i}" style="margin: 0; padding: 0.75rem 0.9rem;">
+
+                <div class="detail-row">
+                  <span class="detail-label">Parent first name</span>
+                  <input class="admin-edit-input" id="edit-pfirst-${i}" value="${escapeHtml(user.parent_first_name || '')}" style="max-width:200px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Parent last name</span>
+                  <input class="admin-edit-input" id="edit-plast-${i}" value="${escapeHtml(user.parent_last_name || '')}" style="max-width:200px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Parent email</span>
+                  <input class="admin-edit-input" type="email" id="edit-email-${i}" value="${escapeHtml(user.parent_email || '')}" style="max-width:240px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Child's name</span>
+                  <input class="admin-edit-input" id="edit-cname-${i}" value="${escapeHtml(user.child_name || '')}" style="max-width:200px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Age</span>
+                  <input class="admin-edit-input" type="number" id="edit-age-${i}" min="1" max="17" value="${user.child_age}" style="max-width:80px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Favorite color</span>
+                  <input class="admin-edit-input" id="edit-color-${i}" value="${escapeHtml(user.favorite_color || '')}" style="max-width:180px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Favorite animal</span>
+                  <input class="admin-edit-input" id="edit-animal-${i}" value="${escapeHtml(user.favorite_animal || '')}" style="max-width:180px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Things they love</span>
+                  <input class="admin-edit-input" id="edit-things-${i}" value="${escapeHtml(themes)}" style="max-width:240px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Timezone</span>
+                  <select class="admin-edit-select" id="edit-tz-${i}" style="max-width:240px;">
+                    <option value="America/New_York" ${user.timezone === 'America/New_York' ? 'selected' : ''}>Eastern (ET)</option>
+                    <option value="America/Chicago" ${user.timezone === 'America/Chicago' ? 'selected' : ''}>Central (CT)</option>
+                    <option value="America/Denver" ${user.timezone === 'America/Denver' ? 'selected' : ''}>Mountain (MT)</option>
+                    <option value="America/Phoenix" ${user.timezone === 'America/Phoenix' ? 'selected' : ''}>Mountain - AZ</option>
+                    <option value="America/Los_Angeles" ${user.timezone === 'America/Los_Angeles' ? 'selected' : ''}>Pacific (PT)</option>
+                    <option value="America/Anchorage" ${user.timezone === 'America/Anchorage' ? 'selected' : ''}>Alaska</option>
+                    <option value="Pacific/Honolulu" ${user.timezone === 'Pacific/Honolulu' ? 'selected' : ''}>Hawaii</option>
+                    <option value="America/Puerto_Rico" ${user.timezone === 'America/Puerto_Rico' ? 'selected' : ''}>Atlantic (PR)</option>
+                  </select>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Next story send</span>
+                  <input class="admin-edit-input" type="datetime-local" id="edit-nextsend-${i}" value="${nextSendLocal}" style="max-width:220px;" />
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Subscription status</span>
+                  <select class="admin-edit-select" id="edit-substatus-${i}" style="max-width:180px;">
+                    <option value="trialing" ${user.subscription_status === 'trialing' ? 'selected' : ''}>Trialing</option>
+                    <option value="active" ${user.subscription_status === 'active' ? 'selected' : ''}>Active</option>
+                    <option value="canceled" ${user.subscription_status === 'canceled' ? 'selected' : ''}>Canceled</option>
+                    <option value="past_due" ${user.subscription_status === 'past_due' ? 'selected' : ''}>Past due</option>
+                  </select>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Stories generated</span>
+                  <span class="detail-value">${user.story_count}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Subscribed since</span>
+                  <span class="detail-value">${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} (${daysSince(user.created_at)} ago)</span>
+                </div>
+
+                <button class="admin-save-btn" id="admin-save-btn-${i}"
+                  onclick="event.stopPropagation(); adminSaveUser(${i}, '${user.id}', '${user.parent_id || ''}')">
+                  Save changes
+                </button>
+                <p class="save-confirm" id="admin-save-confirm-${i}" style="text-align:center;font-size:0.78rem;color:#97C459;margin-top:0.5rem;display:none;">Saved!</p>
+
+                <button class="manage-account-btn" id="manage-btn-${i}"
+                  onclick="event.stopPropagation(); copyManageLink('${user.parent_id || user.id}', ${i})">
+                  Copy manage account link
+                </button>
+
+                <button class="cancel-account-btn" id="cancel-btn-${i}"
+                  onclick="event.stopPropagation(); cancelAccount('${user.parent_id || ''}', ${i}, '${escapeHtml(parentName)}')">
+                  Cancel account
+                </button>
+
               </div>
             </td>
           </tr>
@@ -1086,56 +1241,123 @@
       }).join('');
     }
 
-    async function unsubscribeUser(childId, i, childName) {
-      const confirmed = confirm(`Unsubscribe ${childName} from StoryTrail emails? They'll stop receiving nightly stories until reactivated.`);
-      if (!confirmed) return;
-
-      const btn = document.getElementById(`unsub-btn-${i}`);
+    async function adminSaveUser(i, childId, parentId) {
+      const btn = document.getElementById(`admin-save-btn-${i}`);
+      const confirmEl = document.getElementById(`admin-save-confirm-${i}`);
+      confirmEl.style.display = 'none';
       btn.disabled = true;
-      btn.textContent = 'Unsubscribing...';
+      btn.textContent = 'Saving...';
+
+      const payload = {
+        action: 'admin_update',
+        password: adminPassword,
+        parent_id: parentId,
+        child_id: childId,
+        parent_first_name: document.getElementById(`edit-pfirst-${i}`).value.trim(),
+        parent_last_name: document.getElementById(`edit-plast-${i}`).value.trim(),
+        parent_email: document.getElementById(`edit-email-${i}`).value.trim(),
+        child_name: document.getElementById(`edit-cname-${i}`).value.trim(),
+        child_age: parseInt(document.getElementById(`edit-age-${i}`).value, 10),
+        favorite_color: document.getElementById(`edit-color-${i}`).value.trim(),
+        favorite_animal: document.getElementById(`edit-animal-${i}`).value.trim(),
+        theme_tags: document.getElementById(`edit-things-${i}`).value.trim().split(',').map(t => t.trim()).filter(Boolean),
+        timezone: document.getElementById(`edit-tz-${i}`).value,
+        next_send_at: document.getElementById(`edit-nextsend-${i}`).value
+          ? new Date(document.getElementById(`edit-nextsend-${i}`).value).toISOString()
+          : null,
+        subscription_status: document.getElementById(`edit-substatus-${i}`).value,
+      };
 
       try {
-        const response = await fetch(UNSUBSCRIBE_FUNCTION_URL, {
+        const resp = await fetch(MANAGE_ACCOUNT_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
             'apikey': SUPABASE_PUBLISHABLE_KEY,
           },
-          body: JSON.stringify({ password: adminPassword, child_id: childId }),
+          body: JSON.stringify(payload),
         });
+        const result = await resp.json();
+        btn.disabled = false;
+        btn.textContent = 'Save changes';
 
-        const result = await response.json();
-
-        if (!response.ok) {
+        if (!resp.ok) {
           alert(result.error || 'Something went wrong. Please try again.');
-          btn.disabled = false;
-          btn.textContent = 'Unsubscribe from emails';
           return;
         }
 
-        // Refresh the users list so the row reflects the new inactive status
+        confirmEl.style.display = 'block';
+        setTimeout(() => { confirmEl.style.display = 'none'; }, 2000);
+
+        // Refresh user list to reflect changes
         const refreshed = await fetchFromServer('users');
         if (refreshed) {
           allUsers = refreshed.users || [];
           renderUsers();
         }
-
       } catch (err) {
-        alert('Something went wrong. Please try again.');
         btn.disabled = false;
-        btn.textContent = 'Unsubscribe from emails';
+        btn.textContent = 'Save changes';
+        alert('Something went wrong. Please try again.');
       }
     }
 
-    function copyPreferencesLink(childId, i) {
-      const link = `https://storytrail.shop/update-preferences?id=${childId}`;
+    function copyManageLink(parentId, i) {
+      const link = `https://storytrail.shop/manage-account?id=${parentId}`;
       navigator.clipboard.writeText(link).then(() => {
-        const btn = document.getElementById(`copy-btn-${i}`);
-        const originalText = btn.textContent;
+        const btn = document.getElementById(`manage-btn-${i}`);
+        const orig = btn.textContent;
         btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = originalText; }, 1500);
+        setTimeout(() => { btn.textContent = orig; }, 1500);
       });
+    }
+
+    async function cancelAccount(parentId, i, parentName) {
+      const confirmed = confirm(`Cancel ${parentName}'s account? This will cancel their Stripe subscription and deactivate all their children in Supabase. This cannot be undone automatically.`);
+      if (!confirmed) return;
+
+      const btn = document.getElementById(`cancel-btn-${i}`);
+      btn.disabled = true;
+      btn.textContent = 'Canceling...';
+
+      try {
+        const resp = await fetch(MANAGE_ACCOUNT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            action: 'admin_cancel',
+            password: adminPassword,
+            parent_id: parentId,
+          }),
+        });
+        const result = await resp.json();
+
+        btn.disabled = false;
+        btn.textContent = 'Cancel account';
+
+        if (!resp.ok) {
+          alert(result.error || 'Something went wrong. Please try again.');
+          return;
+        }
+
+        alert(`${parentName}'s account has been canceled.`);
+
+        // Refresh user list
+        const refreshed = await fetchFromServer('users');
+        if (refreshed) {
+          allUsers = refreshed.users || [];
+          renderUsers();
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Cancel account';
+        alert('Something went wrong. Please try again.');
+      }
     }
 
     function toggleItem(id) {
