@@ -536,6 +536,18 @@
           <div class="stat-grid" id="dash-stat-grid">
             <div class="loading">Loading dashboard...</div>
           </div>
+
+          <h2 class="dash-section-label">Email delivery</h2>
+          <div class="sort-bar">
+            <span style="color: var(--periwinkle); font-size: 0.85rem;">Period:</span>
+            <button class="sort-btn" id="dash-email-period-day" onclick="setDashEmailPeriod('day')">Today</button>
+            <button class="sort-btn" id="dash-email-period-week" onclick="setDashEmailPeriod('week')">7 days</button>
+            <button class="sort-btn" id="dash-email-period-month" onclick="setDashEmailPeriod('month')">30 days</button>
+            <button class="sort-btn active" id="dash-email-period-all" onclick="setDashEmailPeriod('all')">All time</button>
+          </div>
+          <div class="stat-grid" id="dash-email-stat-grid">
+            <div class="loading">Loading email stats...</div>
+          </div>
         </div>
 
         <div class="panel" id="panel-users">
@@ -601,6 +613,7 @@
     let usersSort = 'created';
     let logsFilter = 'all';
     let dashPeriod = 'all';
+    let dashEmailPeriod = 'all';
     let logsLoaded = false;
 
     async function checkPassword() {
@@ -636,6 +649,66 @@
       document.getElementById('gate').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       renderDashboard(dashResult.dashboard);
+
+      // Also load email delivery stats
+      const emailResult = await fetchFromServer('dashboard', password, dashEmailPeriod);
+      if (emailResult) renderEmailDashboard(emailResult.dashboard);
+    }
+
+
+    async function setDashEmailPeriod(period) {
+      dashEmailPeriod = period;
+      ['day', 'week', 'month', 'all'].forEach(p => {
+        document.getElementById(`dash-email-period-${p}`).classList.toggle('active', p === period);
+      });
+      document.getElementById('dash-email-stat-grid').innerHTML = '<div class="loading">Loading email stats...</div>';
+      const result = await fetchFromServer('dashboard', null, period);
+      if (result) renderEmailDashboard(result.dashboard);
+    }
+
+    function renderEmailDashboard(stats) {
+      const gridEl = document.getElementById('dash-email-stat-grid');
+      if (!stats) {
+        gridEl.innerHTML = '<div class="empty">Couldn't load email stats.</div>';
+        return;
+      }
+
+      const rateClass = stats.successRate === null
+        ? ''
+        : stats.successRate >= 95 ? 'stat-good' : stats.successRate < 80 ? 'stat-bad' : '';
+
+      gridEl.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-card-label">Active subscribers</div>
+          <div class="stat-card-value">${stats.activeSubscribers}</div>
+          <div class="stat-card-note">Children currently receiving stories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Unsubscribed</div>
+          <div class="stat-card-value">${stats.inactiveSubscribers}</div>
+          <div class="stat-card-note">Manually deactivated</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">New signups</div>
+          <div class="stat-card-value">${stats.newSignups}</div>
+          <div class="stat-card-note">In selected period</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Emails sent</div>
+          <div class="stat-card-value">${stats.emailsSent}</div>
+          <div class="stat-card-note">Successful deliveries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Emails failed</div>
+          <div class="stat-card-value ${stats.emailsFailed > 0 ? 'stat-bad' : ''}">${stats.emailsFailed}</div>
+          <div class="stat-card-note">Failed send attempts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Success rate</div>
+          <div class="stat-card-value ${rateClass}">${stats.successRate === null ? '—' : stats.successRate + '%'}</div>
+          <div class="stat-card-note">Emails sent vs attempted</div>
+        </div>
+      `;
     }
 
     async function fetchFromServer(view, passwordOverride, period) {
