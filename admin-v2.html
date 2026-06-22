@@ -480,13 +480,13 @@
     }
 
     .stat-card-value.stat-good { color: #97C459; }
+    .stat-card-value.stat-bad { color: #F09595; }
 
     .stat-card-note {
       font-size: 0.72rem;
       color: var(--periwinkle);
       margin-top: 0.4rem;
     }
-    .stat-card-value.stat-bad { color: #F09595; }
 
     @media (max-width: 640px) {
       .layout { flex-direction: column; }
@@ -517,7 +517,7 @@
   <div id="app">
     <div class="layout">
       <div class="sidebar">
-        <div class="sidebar-logo">StoryTrail</div>
+        <div class="sidebar-logo">Admin</div>
         <button class="nav-item active" id="nav-dashboard" onclick="switchPanel('dashboard')">Dashboard</button>
         <button class="nav-item" id="nav-users" onclick="switchPanel('users')">Users</button>
         <button class="nav-item" id="nav-logs" onclick="switchPanel('logs')">Email Logs</button>
@@ -536,7 +536,7 @@
           <div class="stat-grid" id="dash-stat-grid">
             <div class="loading">Loading dashboard...</div>
           </div>
-
+          </div>
         </div>
 
         <div class="panel" id="panel-users">
@@ -591,37 +591,10 @@
 
   <script>
     const EDGE_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/get-stories";
-    const V2_DASHBOARD_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/admin-v2-dashboard";
     const RESEND_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/resend-email";
     const UNSUBSCRIBE_FUNCTION_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/unsubscribe-child";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable__sJS00XeyI_Cwh_lvD8XBQ_DCr2Rp17";
-
-
-    }
-
-
-
-      const rateDisplay = stats.conversionRate === null ? '—' : `${stats.conversionRate}%`;
-      const rateNote = stats.resolvedCount > 0
-        ? `${stats.convertedCount} of ${stats.resolvedCount} resolved trials`
-        : 'No resolved trials yet';
-
-      gridEl.innerHTML = `
-        <div class="stat-card">
-          <div class="stat-card-label">Active trials</div>
-          <div class="stat-card-value">${stats.activeTrials}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-label">Active paid subscribers</div>
-          <div class="stat-card-value">${stats.activePaid}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-label">Trial → paid conversion</div>
-          <div class="stat-card-value">${rateDisplay}</div>
-          <div style="font-size:0.72rem;color:var(--periwinkle);margin-top:0.3rem;">${rateNote}</div>
-        </div>
-      `;
-    }
+    const V2_DASHBOARD_URL = "https://hehtzbzrziehwmeeeqqy.supabase.co/functions/v1/admin-v2-dashboard";
 
     let adminPassword = '';
     let allUsers = [];
@@ -638,9 +611,8 @@
 
       let dashResult = null;
       let status = 0;
-
       try {
-        const dashResp = await fetch(V2_DASHBOARD_URL, {
+        const resp = await fetch(V2_DASHBOARD_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -649,8 +621,8 @@
           },
           body: JSON.stringify({ password, period: dashPeriod }),
         });
-        status = dashResp.status;
-        if (dashResp.ok) dashResult = await dashResp.json();
+        status = resp.status;
+        if (resp.ok) dashResult = await resp.json();
       } catch (e) {
         console.error('Dashboard fetch failed:', e);
       }
@@ -734,13 +706,15 @@
           const result = await resp.json();
           renderDashboard(result.dashboard);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Dashboard period fetch failed:', e);
+      }
     }
 
     function renderDashboard(stats) {
       const gridEl = document.getElementById('dash-stat-grid');
       if (!stats) {
-        gridEl.innerHTML = '<div class="empty">Couldn\'t load dashboard stats.</div>';
+        gridEl.innerHTML = '<div class="empty">Couldn't load dashboard stats.</div>';
         return;
       }
 
