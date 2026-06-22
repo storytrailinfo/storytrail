@@ -636,12 +636,9 @@
       const errorEl = document.getElementById('gate-error');
       errorEl.style.display = 'none';
 
-      // Verify the password with a lightweight dashboard fetch rather
-      // than pre-loading users data here -- keeps "fetch" and "render"
-      // always paired together in switchPanel, with no risk of data
-      // being fetched once but never actually drawn to the page.
-      // Verify password and load dashboard via admin-v2-dashboard function
       let dashResult = null;
+      let status = 0;
+
       try {
         const dashResp = await fetch(V2_DASHBOARD_URL, {
           method: 'POST',
@@ -652,21 +649,22 @@
           },
           body: JSON.stringify({ password, period: dashPeriod }),
         });
+        status = dashResp.status;
         if (dashResp.ok) dashResult = await dashResp.json();
-      } catch (e) {}
+      } catch (e) {
+        console.error('Dashboard fetch failed:', e);
+      }
 
-      if (dashResult === null) {
+      if (!dashResult) {
+        errorEl.textContent = status === 401 ? 'Incorrect password.' : 'Could not connect. Please try again.';
         errorEl.style.display = 'block';
         return;
       }
 
       adminPassword = password;
-
       document.getElementById('gate').style.display = 'none';
       document.getElementById('app').style.display = 'block';
-
       renderDashboard(dashResult.dashboard);
-
     }
 
     async function fetchFromServer(view, passwordOverride, period) {
